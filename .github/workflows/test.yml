@@ -1,0 +1,75 @@
+name: Test
+
+on:
+  push:
+    pull_request:
+    branches:
+      - staging
+      - trying
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: rustfmt, clippy
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-
+
+      - name: Check formatting
+        run: cargo fmt -- --check
+
+      - name: Lint
+        run: cargo clippy -- -D warnings
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable 
+          override: true
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-
+
+      - name: Run tests
+        run: cargo test --no-fail-fast --all --workspace
+
+  bors-report:
+    runs-on: ubuntu-latest
+
+    needs:
+      - test
+      - lint
+
+    steps:
+      - name: Check
+        run: |
+          [${{ needs.lint.result }} == success] &&
+          [${{ needs.test.result }} == success] || exit 1
