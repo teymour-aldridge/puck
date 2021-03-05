@@ -15,7 +15,8 @@ jobs:
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: stable
+          target: wasm32-wasi
           override: true
           components: rustfmt, clippy
 
@@ -36,17 +37,21 @@ jobs:
         run: cargo clippy -- -D warnings
 
   test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest]
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install Lunatic
+        run: |
+          brew tap lunatic-solutions/lunatic
+          brew install lunatic
+
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable 
+          toolchain: stable
           override: true
+          components: rustfmt, clippy
+          target: wasm32-wasi
 
       - uses: actions/cache@v2
         with:
@@ -59,7 +64,7 @@ jobs:
             cargo-${{ runner.os }}-
 
       - name: Run tests
-        run: cargo test --no-fail-fast --all --workspace
+        run: cargo test
 
   bors-report:
     runs-on: ubuntu-latest
@@ -71,5 +76,5 @@ jobs:
     steps:
       - name: Check
         run: |
-          [${{ needs.lint.result }} == success] &&
-          [${{ needs.test.result }} == success] || exit 1
+          [ ${{ needs.lint.result }} == success ] &&
+          [ ${{ needs.test.result }} == success ] || exit 1

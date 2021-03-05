@@ -19,14 +19,15 @@ fn home(req: Request) -> Response {
     }
 }
 
-fn hello(_: Request) -> Response {
+fn hello(req: Request) -> Response {
+    let name = req.url.path().split('/').last().unwrap();
     Response {
         headers: {
             let mut res = HashMap::new();
             res.insert("Content-Type".to_string(), HTML.to_string());
             res
         },
-        body: Body::from_string("<h1>Hello!</h1>".to_string()),
+        body: Body::from_string(format!("<h1>Hello {}!</h1>", name)),
         status: 200,
         reason: "success".to_string(),
         method: Method::Get,
@@ -35,7 +36,7 @@ fn hello(_: Request) -> Response {
 
 #[puck::handler(
     handle(at = "/", function = "home"),
-    handle(at = "/hello", function = "hello")
+    handle(at = "/hello/<string>", function = "hello")
 )]
 pub struct App;
 
