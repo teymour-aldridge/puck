@@ -38,7 +38,6 @@ jobs:
 
   test:
     runs-on: macos-latest
-
     steps:
       - uses: actions/checkout@v2
 
@@ -46,6 +45,13 @@ jobs:
         run: |
           brew tap lunatic-solutions/lunatic
           brew install lunatic
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+          target: wasm32-wasi
 
       - uses: actions/cache@v2
         with:
