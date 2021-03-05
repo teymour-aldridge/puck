@@ -1,4 +1,4 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 use crate::request::{Body, Method};
 
@@ -8,7 +8,7 @@ pub struct Response {
     pub body: Body,
     pub status: u16,
     pub reason: String,
-    pub method: Method
+    pub method: Method,
 }
 
 impl Response {

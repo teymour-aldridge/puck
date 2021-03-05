@@ -12,6 +12,7 @@ pub use puck_codegen::handler;
 pub mod encoder;
 pub mod request;
 pub mod response;
+pub mod route;
 
 pub use request::Request;
 use request::{Body, Method, HTML};
