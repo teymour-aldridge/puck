@@ -15,7 +15,8 @@ jobs:
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: stable
+          target: wasm32-wasi
           override: true
           components: rustfmt, clippy
 
@@ -45,7 +46,8 @@ jobs:
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable 
+          toolchain: stable
+          target: wasm32-wasi
           override: true
 
       - uses: actions/cache@v2
