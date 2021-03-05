@@ -76,5 +76,5 @@ jobs:
     steps:
       - name: Check
         run: |
-          [${{ needs.lint.result }} == success] &&
-          [${{ needs.test.result }} == success] || exit 1
+          [ ${{ needs.lint.result }} == success ] &&
+          [ ${{ needs.test.result }} == success ] || exit 1
