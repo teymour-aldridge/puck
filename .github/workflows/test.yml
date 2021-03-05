@@ -50,7 +50,9 @@ jobs:
           test -d ~/.linuxbrew && eval $(~/.linuxbrew/bin/brew shellenv)
           test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
           echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.profile
+          echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
           echo "::add-path::/home/linuxbrew/.linuxbrew/bin"
+          echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
           brew --version
 
       - name: Verify Homebrew installation
