@@ -29,7 +29,6 @@ jobs:
           key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
           restore-keys: |
             cargo-${{ runner.os }}-
-
       - name: Check formatting
         run: cargo fmt -- --check
 
@@ -45,7 +44,6 @@ jobs:
         run: |
           brew tap lunatic-solutions/lunatic
           brew install lunatic
-
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -62,7 +60,6 @@ jobs:
           key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
           restore-keys: |
             cargo-${{ runner.os }}-
-
       - name: Run tests
         run: cargo test
 

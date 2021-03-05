@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 puck = { path = "../../puck" }
+serde = { version = "1.0.123", features = ["derive"] }

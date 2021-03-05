@@ -2,11 +2,9 @@
 
 use std::collections::HashMap;
 
+pub use anyhow;
 pub use lunatic;
-use lunatic::{
-    net::{TcpListener, TcpStream},
-    Process,
-};
+
 pub use puck_codegen::handler;
 
 pub mod encoder;
@@ -19,15 +17,11 @@ use request::{Body, Method, HTML};
 pub use response::Response;
 
 pub trait Handler {
-    fn handle(stream: TcpStream);
+    fn handle(address: &'static str) -> anyhow::Result<()>;
 }
 
 pub fn serve<H: Handler>(address: &'static str) -> anyhow::Result<()> {
-    let conn = TcpListener::bind(address)?;
-    while let Ok(stream) = conn.accept() {
-        Process::spawn_with(stream, H::handle).detach();
-    }
-    Ok(())
+    H::handle(address)
 }
 
 pub fn err_404(_: Request) -> Response {
