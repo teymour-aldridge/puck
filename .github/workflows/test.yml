@@ -44,24 +44,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install Homebrew
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-          test -d ~/.linuxbrew && eval $(~/.linuxbrew/bin/brew shellenv)
-          test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-          echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.profile
-          echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
-          echo "::add-path::/home/linuxbrew/.linuxbrew/bin"
-          echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
-          brew --version
-
-      - name: Verify Homebrew installation
-        run: brew --version
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
 
       - name: Install lunatic
         run: |
-          brew tap lunatic-solutions/lunatic
-          brew install lunatic
+          git clone https://github.com/lunatic-solutions/lunatic
+          (cd lunatic && cargo +nightly install --path)
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -80,7 +70,7 @@ jobs:
             cargo-${{ runner.os }}-
 
       - name: Run tests
-        run: cargo test --no-fail-fast --all --workspace
+        run: cargo test
 
   bors-report:
     runs-on: ubuntu-latest
