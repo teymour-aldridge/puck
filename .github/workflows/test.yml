@@ -51,7 +51,7 @@ jobs:
       - name: Install lunatic
         run: |
           git clone https://github.com/lunatic-solutions/lunatic
-          (cd lunatic && cargo +nightly install --path)
+          (cd lunatic && cargo +nightly install --path .)
 
       - uses: actions-rs/toolchain@v1
         with:
