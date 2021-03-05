@@ -69,7 +69,7 @@ pub fn handler(args: TokenStream, input: TokenStream) -> TokenStream {
                 })
                 .collect::<Vec<proc_macro2::TokenStream>>();
 
-            let function = format_ident!("{}", handler.function.clone());
+            let function = format_ident!("{}", handler.function);
             let len = segments.len();
 
             let collected = segments
