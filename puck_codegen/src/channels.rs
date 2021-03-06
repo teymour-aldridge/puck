@@ -18,30 +18,28 @@ impl Channels {
     pub fn new(items: Vec<Channel>) -> Self {
         Self { items }
     }
-    pub fn emit_routes(&self, handlers: Vec<Handler>) -> Result<TokenStream, syn::Error> {
-        Ok(handlers
+    pub fn emit_routes(&self, handlers: Vec<Handler>) -> TokenStream {
+        handlers
             .into_iter()
             .map(|handler| self.call(&handler))
-            .collect::<Result<Vec<TokenStream>, syn::Error>>()?
-            .into_iter()
-            .fold(quote! {}, |a, b| quote! {#a #b}))
+            .fold(quote! {}, |a, b| quote! {#a #b})
     }
 
-    fn call(&self, handler: &Handler) -> Result<TokenStream, syn::Error> {
+    fn call(&self, handler: &Handler) -> TokenStream {
         let collected = route_matcher(handler);
 
-        let len = handler.at.split('/').collect::<Vec<_>>().len();
+        let len = handler.at.split('/').count();
         let function = format_ident!("{}", handler.function);
 
         let extra_args = handler
             .receive
             .iter()
             .filter_map(|receive| {
+                #[allow(clippy::cmp_owned)]
                 if self
                     .items
                     .iter()
-                    .find(|channel| channel.name.to_string() == receive.to_string())
-                    .is_some()
+                    .any(|channel| receive.to_string() == channel.name.to_string())
                 {
                     let receive = format_ident!("receive_{}", receive);
                     Some(quote! {
@@ -57,11 +55,11 @@ impl Channels {
             .send
             .iter()
             .filter_map(|receive| {
+                #[allow(clippy::cmp_owned)]
                 if self
                     .items
                     .iter()
-                    .find(|channel| channel.name.to_string() == receive.to_string())
-                    .is_some()
+                    .any(|channel| receive.to_string() == channel.name.to_string())
                 {
                     let receive = format_ident!("send_{}", receive);
                     Some(quote! {
@@ -73,7 +71,7 @@ impl Channels {
             })
             .fold(extra_args, |a, b| quote! {#a, #b});
 
-        Ok(quote! {
+        quote! {
             if split.len() == #len {
                 if ** #collected {
                     let response = #function(request #extra_args);
@@ -83,7 +81,7 @@ impl Channels {
                     return;
                 }
             }
-        })
+        }
     }
 
     pub fn emit_tys(&self) -> TokenStream {

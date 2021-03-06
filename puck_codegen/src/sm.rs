@@ -39,8 +39,7 @@ pub fn route_matcher(handler: &Handler) -> TokenStream {
                     true
                 }
             }
-        })
-        .collect::<Vec<proc_macro2::TokenStream>>();
+        });
 
     segments
         .into_iter()

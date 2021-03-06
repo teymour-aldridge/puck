@@ -48,10 +48,7 @@ pub fn handler(args: TokenStream, input: TokenStream) -> TokenStream {
 
     let call_clone = channels.emit_call_clone();
 
-    let routes = match channels.emit_routes(args.handle) {
-        Ok(t) => t,
-        Err(e) => return e.to_compile_error().into(),
-    };
+    let routes = channels.emit_routes(args.handle);
 
     let res: TokenStream = From::from(quote! {
         #derive
