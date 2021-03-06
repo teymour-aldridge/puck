@@ -1,19 +1,27 @@
 use darling::FromMeta;
-use quote::{format_ident, quote};
-use syn::{parse_macro_input, AttributeArgs, DeriveInput};
+use quote::quote;
+use syn::{parse_macro_input, AttributeArgs, DeriveInput, Ident};
 
 use proc_macro::TokenStream;
+
+use crate::channels::{Channel, Channels};
 
 #[derive(darling::FromMeta)]
 struct Route {
     #[darling(multiple)]
     handle: Vec<Handler>,
+    #[darling(multiple)]
+    channels: Vec<Channel>,
 }
 
-#[derive(darling::FromMeta)]
-struct Handler {
-    at: String,
-    function: String,
+#[derive(darling::FromMeta, Clone)]
+pub struct Handler {
+    pub at: String,
+    pub function: String,
+    #[darling(default, multiple)]
+    pub receive: Vec<Ident>,
+    #[darling(default, multiple)]
+    pub send: Vec<Ident>,
 }
 
 pub enum Segment {
@@ -29,94 +37,46 @@ pub fn handler(args: TokenStream, input: TokenStream) -> TokenStream {
         Err(e) => return e.write_errors().into(),
     };
 
-    let state_machine = args
-        .handle
-        .into_iter()
-        .map(|handler| {
-            let path: String = handler.at.clone();
-
-            let segments = path
-                .split('/')
-                .map(|split| {
-                    if split.starts_with('<') {
-                        if split.starts_with("<int") {
-                            Segment::Int
-                        } else if split.starts_with("<string") {
-                            Segment::String
-                        } else {
-                            unreachable!()
-                        }
-                    } else {
-                        Segment::Static(split.to_string())
-                    }
-                })
-                .map(|segment| match segment {
-                    Segment::Static(segment) => {
-                        quote! {
-                            #segment == path
-                        }
-                    }
-                    Segment::Int => {
-                        quote! {
-                            path.parse::<i32>().is_ok()
-                        }
-                    }
-                    Segment::String => {
-                        quote! {
-                            true
-                        }
-                    }
-                })
-                .collect::<Vec<proc_macro2::TokenStream>>();
-
-            let function = format_ident!("{}", handler.function);
-            let len = segments.len();
-
-            let collected = segments
-                .into_iter()
-                .enumerate()
-                .map(|(pos, token_stream)| {
-                    quote! {{
-                        let path = split[#pos];
-                        #token_stream
-                    }}
-                })
-                .fold(quote! {}, |a, b| quote! {#a && #b});
-
-            quote! {
-                if split.len() == #len {
-                    if ** #collected {
-                        let response = #function(request);
-                        let mut encoder = ::puck::encoder::Encoder::new(response);
-                        encoder.write_tcp_stream(stream).unwrap();
-                        #[allow(all)]
-                        return;
-                    }
-                }
-            }
-        })
-        .fold(quote! {}, |a, b| quote! {#a #b});
+    let channels = Channels::new(args.channels);
 
     let derive = parse_macro_input!(input as DeriveInput);
     let ident = derive.ident.clone();
 
-    From::from(quote! {
-        #derive
+    let tys = channels.emit_tys();
 
-        impl ::puck::Handler for #ident {
-            fn handle(stream: ::puck::lunatic::net::TcpStream) {
-                let request = ::puck::Request::parse(&stream)
+    let call = channels.emit_call();
+
+    let call_clone = channels.emit_call_clone();
+
+    let routes = channels.emit_routes(args.handle);
+
+    let res: TokenStream = From::from(quote! {
+        #derive
+        fn __inner_request_handler((stream, #call): (::puck::lunatic::net::TcpStream, #tys)) {
+            let request = ::puck::Request::parse(&stream)
                     .expect("could not parse request")
                     .expect("empty request");
                 let path = request.url.path();
                 let split = path.split('/').collect::<Vec<_>>();
-                #state_machine
+                #routes
                 else {
                     let response = ::puck::err_404(request);
                     let mut encoder = ::puck::encoder::Encoder::new(response);
                     encoder.write_tcp_stream(stream).unwrap();
                 }
+        }
+
+        impl ::puck::Handler for #ident {
+            fn handle(addr: &'static str) -> ::puck::anyhow::Result<()> {
+                let conn = ::puck::lunatic::net::TcpListener::bind(addr)?;
+                #channels
+                while let Ok(stream) = conn.accept() {
+                    ::puck::lunatic::Process::spawn_with((stream, #call_clone), __inner_request_handler)
+                        .detach();
+                }
+                Ok(())
             }
         }
-    })
+    });
+    res
 }
