@@ -27,7 +27,7 @@ impl ResponseBuilder {
     }
 
     pub fn status(mut self, code: u16, reason: impl ToString) -> Self {
-        self.status = Some(code.into());
+        self.status = Some(code);
         self.reason = Some(reason.to_string());
         self
     }
@@ -40,9 +40,9 @@ impl ResponseBuilder {
     pub fn build(self) -> Response {
         Response {
             headers: self.headers,
-            body: self.body.unwrap_or_else(|| Body::empty()),
+            body: self.body.unwrap_or_else(Body::empty),
             status: self.status.unwrap_or(200),
-            reason: self.reason.unwrap_or(String::new()),
+            reason: self.reason.unwrap_or_default(),
             method: self.method.unwrap_or(Method::Get),
         }
     }
