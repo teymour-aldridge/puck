@@ -2,9 +2,6 @@
 
 #![deny(missing_debug_implementations, unused_must_use)]
 
-#[macro_use]
-extern crate derivative;
-
 use std::collections::HashMap;
 
 #[macro_use]
