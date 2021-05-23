@@ -4,6 +4,7 @@ use lunatic::net::TcpStream;
 
 use crate::Response;
 
+#[derive(Debug)]
 pub struct Encoder {
     response: Response,
 }

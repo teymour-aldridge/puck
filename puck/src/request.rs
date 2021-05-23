@@ -13,6 +13,7 @@ const MAX_HEADERS: usize = 16;
 const NEW_LINE: u8 = b'\n';
 
 /// A HTTP request.
+#[derive(Debug)]
 pub struct Request {
     pub headers: HashMap<String, String>,
     pub method: Method,
@@ -118,7 +119,7 @@ impl From<Utf8Error> for RequestParseError {
 }
 
 /// The HTTP method.
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub enum Method {
     Get,
     Post,
@@ -136,7 +137,10 @@ impl Method {
     }
 }
 
+#[derive(Derivative)]
+#[derivative(Debug)]
 pub struct Body {
+    #[derivative(Debug = "ignore")]
     reader: Box<dyn BufRead + 'static>,
     pub(crate) mime: Mime,
     pub(crate) length: Option<usize>,
