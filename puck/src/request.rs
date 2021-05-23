@@ -20,32 +20,6 @@ pub struct Request {
     pub url: Url,
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum RequestParseError {
-    #[error("could not parse")]
-    CouldNotParse,
-    #[error("io error")]
-    IoError,
-}
-
-impl From<std::io::Error> for RequestParseError {
-    fn from(_: std::io::Error) -> Self {
-        Self::IoError
-    }
-}
-
-impl From<httparse::Error> for RequestParseError {
-    fn from(_: httparse::Error) -> Self {
-        Self::CouldNotParse
-    }
-}
-
-impl From<Utf8Error> for RequestParseError {
-    fn from(_: Utf8Error) -> Self {
-        Self::CouldNotParse
-    }
-}
-
 impl Request {
     pub fn parse(stream: &TcpStream) -> Result<Option<Self>, RequestParseError> {
         let mut headers = [httparse::EMPTY_HEADER; MAX_HEADERS];
@@ -117,6 +91,32 @@ impl Request {
     }
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum RequestParseError {
+    #[error("could not parse")]
+    CouldNotParse,
+    #[error("io error")]
+    IoError,
+}
+
+impl From<std::io::Error> for RequestParseError {
+    fn from(_: std::io::Error) -> Self {
+        Self::IoError
+    }
+}
+
+impl From<httparse::Error> for RequestParseError {
+    fn from(_: httparse::Error) -> Self {
+        Self::CouldNotParse
+    }
+}
+
+impl From<Utf8Error> for RequestParseError {
+    fn from(_: Utf8Error) -> Self {
+        Self::CouldNotParse
+    }
+}
+
 /// The HTTP method.
 #[derive(PartialEq, Eq, Clone)]
 pub enum Method {
@@ -152,6 +152,7 @@ impl Body {
             bytes_read: 0,
         }
     }
+
     pub fn from_reader(reader: impl BufRead + 'static, content_length: Option<usize>) -> Self {
         Self {
             reader: Box::new(reader),
@@ -160,7 +161,9 @@ impl Body {
             bytes_read: 0,
         }
     }
-    pub fn from_string(string: String) -> Self {
+
+    pub fn from_string(string: impl ToString) -> Self {
+        let string = string.to_string();
         let length = Some(string.len());
         Self {
             reader: Box::new(Cursor::new(string)),
@@ -169,11 +172,13 @@ impl Body {
             bytes_read: 0,
         }
     }
+
     pub fn into_bytes(mut self) -> std::io::Result<Vec<u8>> {
         let mut buf = Vec::with_capacity(1024);
         self.read_to_end(&mut buf)?;
         Ok(buf)
     }
+
     pub fn into_string(mut self) -> std::io::Result<String> {
         let mut result = String::with_capacity(self.length.unwrap_or(0));
         self.read_to_string(&mut result)?;

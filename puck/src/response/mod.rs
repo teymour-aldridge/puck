@@ -2,13 +2,18 @@ use std::collections::HashMap;
 
 use crate::request::{Body, Method};
 
+use self::builder::ResponseBuilder;
+
+pub mod builder;
+
 /// A HTTP response.
 pub struct Response {
-    pub headers: HashMap<String, String>,
-    pub body: Body,
-    pub status: u16,
-    pub reason: String,
-    pub method: Method,
+    pub(crate) headers: HashMap<String, String>,
+    pub(crate) body: Body,
+    pub(crate) status: u16,
+    pub(crate) reason: String,
+    #[allow(unused)]
+    pub(crate) method: Method,
 }
 
 impl Response {
@@ -23,5 +28,9 @@ impl Response {
     }
     pub fn take_body(&mut self) -> Body {
         self.replace_body(Body::empty())
+    }
+
+    pub fn build() -> ResponseBuilder {
+        ResponseBuilder::new()
     }
 }

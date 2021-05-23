@@ -2,6 +2,9 @@
 
 use std::collections::HashMap;
 
+#[macro_use]
+extern crate derivative;
+
 pub use anyhow;
 pub use lunatic;
 
