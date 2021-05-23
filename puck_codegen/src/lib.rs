@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate syn;
+
 use proc_macro::TokenStream;
 
 mod channels;

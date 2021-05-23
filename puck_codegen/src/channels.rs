@@ -7,7 +7,8 @@ use crate::sm::route_matcher;
 #[derive(darling::FromMeta)]
 pub struct Channel {
     name: String,
-    ty: String,
+    message_type: String,
+    supervisor: Option<String>,
 }
 
 pub struct Channels {
@@ -29,7 +30,7 @@ impl Channels {
         let collected = route_matcher(handler);
 
         let len = handler.at.split('/').count();
-        let function = format_ident!("{}", handler.function);
+        let function = format_ident!("{}", handler.call);
 
         let extra_args = handler
             .receive
@@ -88,7 +89,7 @@ impl Channels {
         self.items
             .iter()
             .map(|item| {
-                let ty = format_ident!("{}", &item.ty);
+                let ty = format_ident!("{}", &item.message_type);
                 quote! {
                     ::puck::lunatic::channel::Sender<#ty>,
                     ::puck::lunatic::channel::Receiver<#ty>
@@ -133,14 +134,27 @@ impl ToTokens for Channels {
                 .iter()
                 .map(|channel| {
                     let channel_name = &channel.name;
-                    let ty = format_ident!("{}", channel.ty);
+                    let ty = format_ident!("{}", channel.message_type);
                     let send_name = format_ident!("send_{}", channel_name);
                     let receive_name = format_ident!("receive_{}", channel_name);
-                    quote! {
+                    let res = quote! {
                         let (#send_name, #receive_name):
                             (::puck::lunatic::channel::Sender<#ty>,
                              ::puck::lunatic::channel::Receiver<#ty>) =
                              ::puck::lunatic::channel::unbounded();
+                    };
+
+                    if let Some(ref supervisor) = channel.supervisor {
+                        let ident = format_ident!("{}", supervisor);
+                        quote! {
+                            #res
+                            ::puck::lunatic::Process::spawn_with(
+                                (#send_name.clone(), #receive_name.clone()),
+                                #ident
+                            ).detach();
+                        }
+                    } else {
+                        res
                     }
                 })
                 .fold(quote! {}, |a, b| quote! {#a #b}),

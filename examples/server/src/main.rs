@@ -36,7 +36,7 @@ fn hello(req: Request) -> Response {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 enum Msg {
     Send(String),
 }
@@ -76,12 +76,18 @@ fn read_info(_: Request, reader: Receiver<Msg>) -> Response {
     }
 }
 
+fn echo_echo((_send, receive): (Sender<Msg>, Receiver<Msg>)) {
+    while let Ok(t) = receive.receive() {
+        println!("{:#?}", t);
+    }
+}
+
 #[puck::handler(
-    handle(at = "/", function = "home"),
-    handle(at = "/hello/<string>", function = "hello"),
-    handle(at = "/submit/<string>", function = "submit_info", send = "echo"),
-    handle(at = "/read", function = "read_info", receive = "echo"),
-    channels(name = "echo", ty = "Msg")
+    handle(at = "/", call = "home"),
+    handle(at = "/hello/<string>", call = "hello"),
+    handle(at = "/submit/<string>", call = "submit_info", send = "echo"),
+    handle(at = "/read", call = "read_info", receive = "echo"),
+    channel(name = "echo", message_type = "Msg", supervisor = "echo_echo")
 )]
 pub struct App;
 
