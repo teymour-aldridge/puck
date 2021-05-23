@@ -1,6 +1,6 @@
 use darling::FromMeta;
 use quote::quote;
-use syn::{parse_macro_input, AttributeArgs, DeriveInput, Ident};
+use syn::{AttributeArgs, DeriveInput, Ident};
 
 use proc_macro::TokenStream;
 
@@ -10,14 +10,14 @@ use crate::channels::{Channel, Channels};
 struct Route {
     #[darling(multiple)]
     handle: Vec<Handler>,
-    #[darling(multiple)]
+    #[darling(multiple, rename="channel")]
     channels: Vec<Channel>,
 }
 
 #[derive(darling::FromMeta, Clone)]
 pub struct Handler {
     pub at: String,
-    pub function: String,
+    pub call: String,
     #[darling(default, multiple)]
     pub receive: Vec<Ident>,
     #[darling(default, multiple)]
@@ -53,9 +53,16 @@ pub fn handler(args: TokenStream, input: TokenStream) -> TokenStream {
     let res: TokenStream = From::from(quote! {
         #derive
         fn __inner_request_handler((stream, #call): (::puck::lunatic::net::TcpStream, #tys)) {
-            let request = ::puck::Request::parse(&stream)
-                    .expect("could not parse request")
-                    .expect("empty request");
+            let request = match ::puck::Request::parse(&stream)
+                    .expect("could not parse request") {
+                        Some(t) => t,
+                        None => {
+                            let response = ::puck::err_400();
+                            let mut encoder = ::puck::encoder::Encoder::new(response);
+                            encoder.write_tcp_stream(stream).unwrap();
+                            return;
+                        }
+                    };
                 let path = request.url.path();
                 let split = path.split('/').collect::<Vec<_>>();
                 #routes

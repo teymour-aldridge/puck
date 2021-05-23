@@ -37,3 +37,18 @@ pub fn err_404(_: Request) -> Response {
         method: Method::Get,
     }
 }
+
+pub fn err_400() -> Response {
+    Response {
+        headers: {
+            let mut res = HashMap::new();
+            res.insert("Content-Type".to_string(), HTML.to_string());
+            res
+        },
+        body: Body::from_string("<h1>400: bad request</h1>".to_string()),
+        status: 400,
+        reason: "bad request".to_string(),
+        method: Method::Get,
+    }
+}
+
