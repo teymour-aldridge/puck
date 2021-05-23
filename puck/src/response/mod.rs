@@ -7,6 +7,7 @@ use self::builder::ResponseBuilder;
 pub mod builder;
 
 /// A HTTP response.
+#[derive(Debug)]
 pub struct Response {
     pub(crate) headers: HashMap<String, String>,
     pub(crate) body: Body,

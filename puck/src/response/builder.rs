@@ -5,7 +5,7 @@ use crate::{
     Response,
 };
 
-#[derive(Derivative)]
+#[derive(Derivative, Debug)]
 #[derivative(Default(new = "true"))]
 pub struct ResponseBuilder {
     headers: HashMap<String, String>,

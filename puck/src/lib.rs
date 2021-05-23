@@ -1,5 +1,7 @@
 //! A HTTP library for the Lunatic Virtual Machine.
 
+#![deny(missing_debug_implementations, unused_must_use)]
+
 use std::collections::HashMap;
 
 #[macro_use]
@@ -13,7 +15,6 @@ pub use puck_codegen::handler;
 pub mod encoder;
 pub mod request;
 pub mod response;
-pub mod route;
 
 pub use request::Request;
 use request::{Body, Method, HTML};
