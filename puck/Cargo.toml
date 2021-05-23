@@ -13,3 +13,4 @@ lunatic = "0.3.10"
 thiserror = "1.0.24"
 puck_codegen = { path = "../puck_codegen" }
 url = "2.2.1"
+derivative = "2.2.0"

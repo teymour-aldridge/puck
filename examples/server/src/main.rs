@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use puck::{
     lunatic::channel::{Receiver, Sender},
     request::{Body, Method, HTML, PLAIN},
@@ -7,33 +5,23 @@ use puck::{
 };
 use serde::{Deserialize, Serialize};
 
-fn home(req: Request) -> Response {
-    Response {
-        headers: {
-            let mut res = HashMap::new();
-            res.insert("Content-Type".to_string(), HTML.to_string());
-            res
-        },
-        body: Body::from_string(req.url.to_string()),
-        status: 200,
-        reason: "success".to_string(),
-        method: Method::Get,
-    }
+fn home(_: Request) -> Response {
+    Response::build()
+        .header("Content-Type", HTML)
+        .body(Body::from_string("Hello World!"))
+        .status(200, "success")
+        .build()
 }
 
 fn hello(req: Request) -> Response {
     let name = req.url.path().split('/').last().unwrap();
-    Response {
-        headers: {
-            let mut res = HashMap::new();
-            res.insert("Content-Type".to_string(), HTML.to_string());
-            res
-        },
-        body: Body::from_string(format!("<h1>Hello {}!</h1>", name)),
-        status: 200,
-        reason: "success".to_string(),
-        method: Method::Get,
-    }
+
+    Response::build()
+        .header("Content-Type", HTML)
+        .body(Body::from_string(format!("<h1>Hello {}!</h1>", name)))
+        .status(200, "success")
+        .method(Method::Get)
+        .build()
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -47,33 +35,23 @@ fn submit_info(req: Request, sender: Sender<Msg>) -> Response {
             req.url.path().split('/').last().unwrap().to_string(),
         ))
         .unwrap();
-    Response {
-        headers: {
-            let mut res = HashMap::new();
-            res.insert("Content-Type".to_string(), PLAIN.to_string());
-            res
-        },
-        body: Body::from_string("Submitted".to_string()),
-        status: 200,
-        reason: "".to_string(),
-        method: Method::Get,
-    }
+    Response::build()
+        .header("Content-Type", PLAIN)
+        .body(Body::from_string("Submitted".to_string()))
+        .status(200, "success")
+        .method(Method::Get)
+        .build()
 }
 
 fn read_info(_: Request, reader: Receiver<Msg>) -> Response {
-    Response {
-        headers: {
-            let mut res = HashMap::new();
-            res.insert("Content-Type".to_string(), PLAIN.to_string());
-            res
-        },
-        body: Body::from_string(match reader.receive().unwrap() {
+    Response::build()
+        .header("Content-Type", PLAIN)
+        .body(Body::from_string(match reader.receive().unwrap() {
             Msg::Send(msg) => msg,
-        }),
-        status: 200,
-        reason: "".to_string(),
-        method: Method::Get,
-    }
+        }))
+        .status(200, "success")
+        .method(Method::Get)
+        .build()
 }
 
 fn echo_echo((_send, receive): (Sender<Msg>, Receiver<Msg>)) {
