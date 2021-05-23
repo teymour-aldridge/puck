@@ -51,4 +51,3 @@ pub fn err_400() -> Response {
         method: Method::Get,
     }
 }
-

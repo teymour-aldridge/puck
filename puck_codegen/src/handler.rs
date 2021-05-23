@@ -10,7 +10,7 @@ use crate::channels::{Channel, Channels};
 struct Route {
     #[darling(multiple)]
     handle: Vec<Handler>,
-    #[darling(multiple, rename="channel")]
+    #[darling(multiple, rename = "channel")]
     channels: Vec<Channel>,
 }
 
