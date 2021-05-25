@@ -27,6 +27,6 @@ docker run --rm \
     -v "${PWD}/autobahn:/autobahn" \
     --network host \
     crossbario/autobahn-testsuite \
-    wstest -m fuzzingclient -s './autobahn/fuzzingclient.json'
+    wstest -m fuzzingclient -s './${PWD}/autobahn/fuzzingclient.json'
 
 test_diff
