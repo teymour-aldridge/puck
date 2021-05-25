@@ -68,6 +68,7 @@ jobs:
       - run: tar xvf lunatic.tar.gz
       - run: rm lunatic.tar.gz
       - run: export PATH=./lunatic:$PATH
+      - run: lunatic --version
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
