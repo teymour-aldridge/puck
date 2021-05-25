@@ -3,7 +3,7 @@
 	"servers": [
 		{
 			"agent": "Puck",
-			"url": "ws://host.docker.internal:5051/ws"
+			"url": "ws://localhost:5051/ws"
 		}
 	],
 	"cases": [
