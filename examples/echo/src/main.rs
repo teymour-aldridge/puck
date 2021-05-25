@@ -11,7 +11,8 @@ use puck::{
 pub fn echo(_: Request, stream: TcpStream) {
     let mut ws = WebSocket::new(stream.clone());
 
-    while let Ok(next) = ws.next() {
+    // note that this will *never* return `None`
+    while let Ok(next) = ws.next().unwrap() {
         match next {
             Message::Text(_) | Message::Binary(_) => {
                 send(stream.clone(), next).unwrap();

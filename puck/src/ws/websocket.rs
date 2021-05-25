@@ -24,27 +24,28 @@ impl WebSocket {
             state: WebSocketState::Open,
         }
     }
+}
 
-    pub fn next(&mut self) -> Result<Message, NextMessageError> {
-        match self.state {
+impl Iterator for WebSocket {
+    type Item = Result<Message, NextMessageError>;
+
+    fn next(&mut self) -> Option<Result<Message, NextMessageError>> {
+        Some(match self.state {
             WebSocketState::Open => match Message::next(self.stream.clone()) {
                 Ok(msg) => {
-                    match msg {
-                        Message::Ping(ref payload) => {
-                            send_frame(
-                                self.stream.clone(),
-                                Frame {
-                                    fin: true,
-                                    rsv1: false,
-                                    rsv2: false,
-                                    rsv3: false,
-                                    op_code: super::frame::OpCode::Pong,
-                                    decoded: payload.clone().unwrap_or_default(),
-                                },
-                            )
-                            .expect("failed to send pong");
-                        }
-                        _ => {}
+                    if let Message::Ping(ref payload) = msg {
+                        send_frame(
+                            self.stream.clone(),
+                            Frame {
+                                fin: true,
+                                rsv1: false,
+                                rsv2: false,
+                                rsv3: false,
+                                op_code: super::frame::OpCode::Pong,
+                                decoded: payload.clone().unwrap_or_default(),
+                            },
+                        )
+                        .expect("failed to send pong");
                     }
                     Ok(msg)
                 }
@@ -60,7 +61,7 @@ impl WebSocket {
                 },
             },
             WebSocketState::Closed => Err(NextMessageError::ConnectionClosed),
-        }
+        })
     }
 }
 

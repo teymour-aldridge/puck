@@ -32,7 +32,7 @@ impl Message {
                 )),
                 crate::ws::frame::OpCode::Ping => {
                     let payload = first.take_decoded();
-                    Ok(Self::Ping(if payload.len() > 0 {
+                    Ok(Self::Ping(if !payload.is_empty() {
                         Some(payload)
                     } else {
                         None
@@ -40,7 +40,7 @@ impl Message {
                 }
                 crate::ws::frame::OpCode::Pong => {
                     let payload = first.take_decoded();
-                    Ok(Self::Pong(if payload.len() > 0 {
+                    Ok(Self::Pong(if !payload.is_empty() {
                         Some(payload)
                     } else {
                         None
@@ -78,12 +78,12 @@ impl Message {
                             DecodeMessageError::ClientProtocolViolationError
                         })?))
                     }
-                    crate::ws::frame::OpCode::Ping => Ok(Self::Ping(if payload.len() > 0 {
+                    crate::ws::frame::OpCode::Ping => Ok(Self::Ping(if !payload.is_empty() {
                         Some(payload)
                     } else {
                         None
                     })),
-                    crate::ws::frame::OpCode::Pong => Ok(Self::Pong(if payload.len() > 0 {
+                    crate::ws::frame::OpCode::Pong => Ok(Self::Pong(if !payload.is_empty() {
                         Some(payload)
                     } else {
                         None

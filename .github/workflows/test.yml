@@ -67,6 +67,13 @@ jobs:
         run: |
           brew tap lunatic-solutions/lunatic
           brew install lunatic
+      - name: Install docker
+        run: |
+          mkdir -p ~/.docker/machine/cache
+          curl -Lo ~/.docker/machine/cache/boot2docker.iso https://github.com/boot2docker/boot2docker/releases/download/v19.03.12/boot2docker.iso
+          brew install docker docker-machine
+          docker-machine create --driver virtualbox default
+          docker-machine env default
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -82,7 +89,7 @@ jobs:
           key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
           restore-keys: |
             cargo-${{ runner.os }}-
-      - run: ./scripts/server_test.sh
+      - run: eval "$(docker-machine env default)" && ./scripts/server_test.sh
 
   bors-report:
     runs-on: ubuntu-latest
