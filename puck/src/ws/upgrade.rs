@@ -33,21 +33,11 @@ pub fn perform_upgrade(req: &crate::Request, stream: TcpStream) -> bool {
         }
     };
 
-    let origin = match req.headers.get("Origin") {
-        Some(t) => t,
-        None => {
-            trace!("Rejecting WebSocket upgrade because of missing `Origin` header.");
-            write_response(err_400(), stream);
-            return false;
-        }
-    };
-
     let result = compute_accept_header(key.clone());
 
     write_response(
         Response::build()
             .header("Sec-WebSocket-Accept", result)
-            .header("Access-Control-Allow-Origin", origin)
             .header("Upgrade", "websocket")
             .header("Connection", "Upgrade")
             .status(101, "Web Socket Protocol Handshake")

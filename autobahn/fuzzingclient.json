@@ -1,0 +1,18 @@
+{
+	"outdir": "./autobahn/server",
+	"servers": [
+		{
+			"agent": "Puck",
+			"url": "ws://host.docker.internal:5051/ws"
+		}
+	],
+	"cases": [
+		"*"
+	],
+	"exclude-cases": [
+		"9.*",
+		"12.*",
+		"13.*"
+	],
+	"exclude-agent-cases": {}
+}

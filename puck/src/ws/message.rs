@@ -1,3 +1,4 @@
+use log::trace;
 use lunatic::net::TcpStream;
 
 use crate::ws::frame::Frame;
@@ -6,8 +7,8 @@ use super::frame::{OpCode, ParseFrameError};
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    Ping,
-    Pong,
+    Ping(Option<Vec<u8>>),
+    Pong(Option<Vec<u8>>),
     Text(String),
     Binary(Vec<u8>),
 }
@@ -17,6 +18,11 @@ impl Message {
         log::trace!("trying to parse next message");
         let first = Frame::parse(stream.clone())?;
 
+        if first.op_code() == &OpCode::Terminate {
+            trace!("Client asked to close connection");
+            return Err(DecodeMessageError::ClientSentCloseFrame);
+        }
+
         if *first.fin() {
             return match first.op_code() {
                 crate::ws::frame::OpCode::Binary => Ok(Self::Binary(first.take_decoded())),
@@ -24,8 +30,22 @@ impl Message {
                     String::from_utf8(first.take_decoded())
                         .map_err(|_| DecodeMessageError::ClientProtocolViolationError)?,
                 )),
-                crate::ws::frame::OpCode::Ping => Ok(Self::Ping),
-                crate::ws::frame::OpCode::Pong => Ok(Self::Pong),
+                crate::ws::frame::OpCode::Ping => {
+                    let payload = first.take_decoded();
+                    Ok(Self::Ping(if payload.len() > 0 {
+                        Some(payload)
+                    } else {
+                        None
+                    }))
+                }
+                crate::ws::frame::OpCode::Pong => {
+                    let payload = first.take_decoded();
+                    Ok(Self::Pong(if payload.len() > 0 {
+                        Some(payload)
+                    } else {
+                        None
+                    }))
+                }
                 _ => Err(DecodeMessageError::ClientProtocolViolationError),
             };
         }
@@ -36,6 +56,11 @@ impl Message {
 
         loop {
             let msg = Frame::parse(stream.clone())?;
+
+            if msg.op_code() == &OpCode::Terminate {
+                trace!("Client asked to close connection");
+                return Err(DecodeMessageError::ClientSentCloseFrame);
+            }
 
             if msg.op_code() != &OpCode::Continue {
                 return Err(DecodeMessageError::ClientProtocolViolationError);
@@ -53,8 +78,16 @@ impl Message {
                             DecodeMessageError::ClientProtocolViolationError
                         })?))
                     }
-                    crate::ws::frame::OpCode::Ping => Ok(Self::Ping),
-                    crate::ws::frame::OpCode::Pong => Ok(Self::Pong),
+                    crate::ws::frame::OpCode::Ping => Ok(Self::Ping(if payload.len() > 0 {
+                        Some(payload)
+                    } else {
+                        None
+                    })),
+                    crate::ws::frame::OpCode::Pong => Ok(Self::Pong(if payload.len() > 0 {
+                        Some(payload)
+                    } else {
+                        None
+                    })),
                     _ => Err(DecodeMessageError::ClientProtocolViolationError),
                 };
             }
@@ -66,6 +99,8 @@ impl Message {
 pub enum DecodeMessageError {
     #[error("the client violated the WebSocket protocol")]
     ClientProtocolViolationError,
+    #[error("the client wants to close the connection")]
+    ClientSentCloseFrame,
 }
 
 impl From<ParseFrameError> for DecodeMessageError {
