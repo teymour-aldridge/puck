@@ -4,19 +4,25 @@ use puck::{
     lunatic::net::TcpStream,
     request::Body,
     serve,
-    ws::{message::Message, send},
+    ws::{message::Message, send::send, websocket::WebSocket},
     Request, Response,
 };
 
 pub fn echo(_: Request, stream: TcpStream) {
-    loop {
-        let next = Message::next(stream.clone());
-        if let Ok(msg) = next {
-            send::send(stream.clone(), msg).unwrap();
-        } else {
-            println!("{:#?}", next.unwrap_err());
+    let mut ws = WebSocket::new(stream.clone());
+
+    // note that this will *never* return `None`
+    while let Ok(next) = ws.next().unwrap() {
+        match next {
+            Message::Text(_) | Message::Binary(_) => {
+                send(stream.clone(), next).unwrap();
+            }
+            // the `WebSocket` struct handles returning pings and pongs, so you don't have to
+            _ => {}
         }
     }
+
+    // you also don't need to close the connection - this is done automatically
 }
 
 pub fn home(_: Request) -> Response {

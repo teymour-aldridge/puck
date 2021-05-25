@@ -10,7 +10,7 @@ pub fn send(stream: TcpStream, msg: Message) -> Result<(), SendFrameError> {
     send_frame(stream, Frame::from(msg))
 }
 
-fn send_frame(mut stream: TcpStream, frame: Frame) -> Result<(), SendFrameError> {
+pub(crate) fn send_frame(mut stream: TcpStream, frame: Frame) -> Result<(), SendFrameError> {
     frame.format(&mut stream)?;
     stream.write_all(frame.decoded())?;
 

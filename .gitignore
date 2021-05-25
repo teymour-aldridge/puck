@@ -1,5 +1,8 @@
+# editors
 .idea
 .vscode
-
+# rust
 target/
 Cargo.lock
+# autobahn test suite
+autobahn/server
