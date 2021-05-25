@@ -26,7 +26,8 @@ pub enum SendFrameError {
 }
 
 impl From<std::io::Error> for SendFrameError {
-    fn from(_: std::io::Error) -> Self {
+    fn from(e: std::io::Error) -> Self {
+        dbg!(e);
         Self::IoError
     }
 }
