@@ -64,11 +64,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install Lunatic
-        run: |
-          wget "https://github.com/lunatic-solutions/lunatic/releases/download/v0.3.1/lunatic-linux-amd64.tar.gz" -O lunatic.tar.gz
-          tar xvf lunatic.tar.gz
-          rm lunatic.tar.gz
-          export PATH=./lunatic:$PATH
+        run: wget "https://github.com/lunatic-solutions/lunatic/releases/download/v0.3.1/lunatic-linux-amd64.tar.gz" -O lunatic.tar.gz
+      - run: tar xvf lunatic.tar.gz
+      - run: rm lunatic.tar.gz
+      - run: export PATH=./lunatic:$PATH
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
