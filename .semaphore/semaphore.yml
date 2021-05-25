@@ -1,0 +1,38 @@
+version: v1.0
+name: Tests
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+  containers:
+    - name: main
+      image: 'registry.semaphoreci.com/rust:1.51'
+blocks:
+  - name: Test
+    task:
+      jobs:
+        - name: Lint
+          commands:
+            - checkout
+            - 'curl https://i.jpillora.com/lunatic-solutions/lunatic@v0.3.1! | sudo bash'
+            - rustup target add wasm32-wasi
+            - rustup component add rustfmt clippy
+            - cargo fmt -- --check
+            - cargo clippy -- -D warnings
+        - name: Run tests
+          commands:
+            - checkout
+            - rustup target add wasm32-wasi
+            - 'curl https://i.jpillora.com/lunatic-solutions/lunatic@v0.3.1! | sudo bash'
+            - cargo check
+    dependencies: []
+  - name: Autobahn test suite
+    dependencies: []
+    task:
+      jobs:
+        - name: Test with Autobahn test suite
+          commands:
+            - checkout
+            - rustup target add wasm32-wasi
+            - 'curl https://i.jpillora.com/lunatic-solutions/lunatic@v0.3.1! | sudo bash'
+            - ./scripts/server_test.sh
