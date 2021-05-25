@@ -19,8 +19,9 @@ function test_diff() {
     fi
 }
 
+cargo build --bin echo
+
 cargo run --bin echo & WSSERVER_PID=$!
-sleep 3
 
 docker run --rm \
     -v "${PWD}/autobahn:/autobahn" \
