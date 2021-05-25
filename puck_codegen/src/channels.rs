@@ -19,14 +19,17 @@ impl Channels {
     pub fn new(items: Vec<Channel>) -> Self {
         Self { items }
     }
+
+    /// Generate the code needed for the routes.
     pub fn emit_routes(&self, handlers: Vec<Handler>) -> TokenStream {
         handlers
             .into_iter()
-            .map(|handler| self.call(&handler))
+            .map(|handler| self.emit_route(&handler))
             .fold(quote! {}, |a, b| quote! {#a #b})
     }
 
-    fn call(&self, handler: &Handler) -> TokenStream {
+    /// Generate the code required for a single root.
+    fn emit_route(&self, handler: &Handler) -> TokenStream {
         let collected = route_matcher(handler);
 
         let len = handler.at.split('/').count();
@@ -72,14 +75,29 @@ impl Channels {
             })
             .fold(extra_args, |a, b| quote! {#a, #b});
 
-        quote! {
-            if split.len() == #len {
-                if ** #collected {
-                    let response = #function(request #extra_args);
-                    let mut encoder = ::puck::encoder::Encoder::new(response);
-                    encoder.write_tcp_stream(stream).unwrap();
-                    #[allow(all)]
-                    return;
+        if handler.web_socket {
+            quote! {
+                if split.len() == #len {
+                    if ** #collected {
+                        let success = ::puck::ws::perform_upgrade(&request, stream.clone());
+                        if !success {
+                            return;
+                        } else {
+                            #function(request, stream, #extra_args)
+                        }
+                    }
+                }
+            }
+        } else {
+            quote! {
+                if split.len() == #len {
+                    if ** #collected {
+                        let response = #function(request #extra_args);
+                        let mut encoder = ::puck::encoder::Encoder::new(response);
+                        encoder.write_tcp_stream(stream).unwrap();
+                        #[allow(all)]
+                        return;
+                    }
                 }
             }
         }

@@ -7,18 +7,21 @@ use std::collections::HashMap;
 #[macro_use]
 extern crate derivative;
 
+pub use puck_codegen::handler;
+
 pub use anyhow;
 pub use lunatic;
+pub use request::Request;
+pub use response::Response;
 
-pub use puck_codegen::handler;
+use encoder::Encoder;
+use lunatic::net::TcpStream;
+use request::{Body, Method, HTML};
 
 pub mod encoder;
 pub mod request;
 pub mod response;
-
-pub use request::Request;
-use request::{Body, Method, HTML};
-pub use response::Response;
+pub mod ws;
 
 pub trait Handler {
     fn handle(address: &'static str) -> anyhow::Result<()>;
@@ -54,4 +57,9 @@ pub fn err_400() -> Response {
         reason: "bad request".to_string(),
         method: Method::Get,
     }
+}
+
+pub fn write_response(res: Response, stream: TcpStream) {
+    let mut encoder = Encoder::new(res);
+    encoder.write_tcp_stream(stream).unwrap();
 }

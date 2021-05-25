@@ -22,6 +22,8 @@ pub struct Handler {
     pub receive: Vec<Ident>,
     #[darling(default, multiple)]
     pub send: Vec<Ident>,
+    #[darling(default)]
+    pub web_socket: bool,
 }
 
 pub enum Segment {
@@ -63,14 +65,15 @@ pub fn handler(args: TokenStream, input: TokenStream) -> TokenStream {
                             return;
                         }
                     };
-                let path = request.url.path();
-                let split = path.split('/').collect::<Vec<_>>();
-                #routes
-                else {
-                    let response = ::puck::err_404(request);
-                    let mut encoder = ::puck::encoder::Encoder::new(response);
-                    encoder.write_tcp_stream(stream).unwrap();
-                }
+
+            let path = request.url.path();
+            let split = path.split('/').collect::<Vec<_>>();
+            #routes
+            else {
+                let response = ::puck::err_404(request);
+                let mut encoder = ::puck::encoder::Encoder::new(response);
+                encoder.write_tcp_stream(stream).unwrap();
+            }
         }
 
         impl ::puck::Handler for #ident {
@@ -85,5 +88,6 @@ pub fn handler(args: TokenStream, input: TokenStream) -> TokenStream {
             }
         }
     });
+
     res
 }

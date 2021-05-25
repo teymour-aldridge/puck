@@ -1,3 +1,2 @@
 [workspace]
-members = ["puck", "puck_codegen", "examples/server"]
-exclude = ["lunatic"]
+members = ["puck", "puck_codegen", "examples/server", "examples/echo"]

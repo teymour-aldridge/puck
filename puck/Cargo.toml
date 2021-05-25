@@ -14,3 +14,7 @@ thiserror = "1.0.24"
 puck_codegen = { path = "../puck_codegen" }
 url = "2.2.1"
 derivative = "2.2.0"
+sha-1 = "0.9.6"
+base64 = "0.13.0"
+byteorder = "1.4.3"
+log = "0.4.14"
