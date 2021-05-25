@@ -65,9 +65,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Lunatic
         run: |
-          wget "https://github.com/lunatic-solutions/lunatic/releases/download/v0.3.1/lunatic-linux-amd64.tar.gz" -O lunatic.zip
-          unzip lunatic.zip
-          rm lunatic.zip
+          wget "https://github.com/lunatic-solutions/lunatic/releases/download/v0.3.1/lunatic-linux-amd64.tar.gz" -O lunatic.tar.gz
+          tar xf lunatic.tar.gz
+          rm lunatic.tar.gz
           export PATH=./lunatic:$PATH
       - uses: actions-rs/toolchain@v1
         with:
