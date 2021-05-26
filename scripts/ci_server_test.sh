@@ -23,10 +23,6 @@ cargo build --bin echo
 
 cargo run --bin echo & WSSERVER_PID=$!
 
-docker run --rm \
-    -v "${PWD}/autobahn:/autobahn" \
-    --network host \
-    crossbario/autobahn-testsuite \
-    wstest -m fuzzingclient -s '/root/puck/autobahn/fuzzingclient.json'
+wstest -m fuzzingclient -s '/root/puck/autobahn/fuzzingclient.json'
 
 test_diff

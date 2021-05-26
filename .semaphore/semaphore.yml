@@ -7,6 +7,8 @@ agent:
   containers:
     - name: main
       image: 'registry.semaphoreci.com/rust:1.51'
+    - name: wstest
+      image: 'crossbario/autobahn-testsuite'
 blocks:
   - name: Test
     task:
