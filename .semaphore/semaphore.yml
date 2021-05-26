@@ -7,8 +7,6 @@ agent:
   containers:
     - name: main
       image: 'registry.semaphoreci.com/rust:1.51'
-    - name: wstest
-      image: 'crossbario/autobahn-testsuite'
 blocks:
   - name: Test
     task:
@@ -29,6 +27,15 @@ blocks:
             - cargo check
     dependencies: []
   - name: Autobahn test suite
+    agent:
+      machine:
+        type: e1-standard-2
+        os_image: ubuntu1804
+      containers:
+        - name: main
+          image: 'registry.semaphoreci.com/rust:1.51'
+        - name: python
+          image: 'registry.semaphoreci.com/python:2'
     dependencies: []
     task:
       jobs:
@@ -37,4 +44,6 @@ blocks:
             - checkout
             - rustup target add wasm32-wasi
             - 'curl https://i.jpillora.com/lunatic-solutions/lunatic@v0.3.1! | sudo bash'
-            - ./scripts/ci_server_test.sh
+            - pip install --user autobahntestsuite
+            - cargo build --bin echo
+            - cargo run -- bin echo & wstest -m fuzzingclient -s ./autobahn/fuzzingclient.json
