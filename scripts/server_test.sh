@@ -3,6 +3,8 @@
 set -euo pipefail
 set -x
 
+export RUST_BACKTRACE=1
+
 function cleanup() {
     kill -9 ${WSSERVER_PID}
 }
