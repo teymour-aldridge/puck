@@ -12,9 +12,7 @@ pub fn send(stream: TcpStream, msg: Message) -> Result<(), SendFrameError> {
 
 pub(crate) fn send_frame(mut stream: TcpStream, frame: Frame) -> Result<(), SendFrameError> {
     frame.format(&mut stream)?;
-    println!("wrote header");
     stream.write_all(frame.decoded())?;
-    println!("wrote contents");
 
     Ok(())
 }
@@ -28,8 +26,7 @@ pub enum SendFrameError {
 }
 
 impl From<std::io::Error> for SendFrameError {
-    fn from(e: std::io::Error) -> Self {
-        dbg!(e);
+    fn from(_: std::io::Error) -> Self {
         Self::IoError
     }
 }

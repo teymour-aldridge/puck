@@ -55,7 +55,6 @@ pub fn handler(args: TokenStream, input: TokenStream) -> TokenStream {
     let res: TokenStream = From::from(quote! {
         #derive
         fn __inner_request_handler((stream, #call): (::puck::lunatic::net::TcpStream, #tys)) {
-            std::env::set_var("RUST_BACKTRACE", "full");
             let request = match ::puck::Request::parse(&stream)
                     .expect("could not parse request") {
                         Some(t) => t,
