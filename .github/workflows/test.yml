@@ -77,6 +77,8 @@ jobs:
           restore-keys: |
             cargo-${{ runner.os }}-
       - run: eval "$(docker-machine env default)" && ./scripts/server_test.sh
+        env:
+          RUST_BACKTRACE: 1
 
   bors-report:
     runs-on: ubuntu-latest
