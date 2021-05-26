@@ -10,22 +10,23 @@ trap cleanup TERM EXIT
 
 function test_diff() {
     if ! diff -q \
-        <(jq -S 'del(."Tungstenite" | .. | .duration?)' 'autobahn/expected-results.json') \
-        <(jq -S 'del(."Tungstenite" | .. | .duration?)' 'autobahn/server/index.json')
+        <(jq -S 'del(."Puck" | .. | .duration?)' 'autobahn/server-results.json') \
+        <(jq -S 'del(."Puck" | .. | .duration?)' 'autobahn/server/index.json')
     then
         echo 'Difference in results, either this is a regression or' \
-             'autobahn/expected-results.json needs to be updated with the new results.' \
+             'autobahn/expected-results.json needs to be updated with the new results.'
         exit 64
     fi
 }
 
-cargo run --bin echo & WSSERVER_PID=$!
-sleep 3
+cargo build --release --bin echo
+
+cargo run --release --bin echo & WSSERVER_PID=$!
 
 docker run --rm \
     -v "${PWD}/autobahn:/autobahn" \
     --network host \
     crossbario/autobahn-testsuite \
-    wstest -m fuzzingclient -s 'autobahn/fuzzingclient.json'
+    wstest -m fuzzingclient -s './autobahn/fuzzingclient.json'
 
 test_diff
