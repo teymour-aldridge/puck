@@ -34,18 +34,15 @@ jobs:
         run: cargo clippy -- -D warnings
 
   main-tests:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Install Lunatic
-        run: |
-          brew tap lunatic-solutions/lunatic
-          brew install lunatic
+        run: curl https://i.jpillora.com/lunatic-solutions/lunatic@v0.3.1! | sudo bash
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-          components: rustfmt, clippy
           target: wasm32-wasi
       - uses: actions/cache@v2
         with:
@@ -60,25 +57,15 @@ jobs:
         run: cargo test
 
   autobahn-tests:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Install Lunatic
-        run: |
-          brew tap lunatic-solutions/lunatic
-          brew install lunatic
-      - name: Install docker
-        run: |
-          mkdir -p ~/.docker/machine/cache
-          curl -Lo ~/.docker/machine/cache/boot2docker.iso https://github.com/boot2docker/boot2docker/releases/download/v19.03.12/boot2docker.iso
-          brew install docker docker-machine
-          docker-machine create --driver virtualbox default
-          docker-machine env default
+        run: curl https://i.jpillora.com/lunatic-solutions/lunatic@v0.3.1! | sudo bash
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-          components: rustfmt, clippy
           target: wasm32-wasi
       - uses: actions/cache@v2
         with:

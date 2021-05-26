@@ -25,7 +25,7 @@ cargo run --release --bin echo & WSSERVER_PID=$!
 
 docker run --rm \
     -v "${PWD}/autobahn:/autobahn" \
-    -p 5051:5051 \
+    --network host \
     crossbario/autobahn-testsuite \
     wstest -m fuzzingclient -s './autobahn/fuzzingclient.json'
 
