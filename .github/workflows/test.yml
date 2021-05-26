@@ -91,5 +91,4 @@ jobs:
       - name: Check
         run: |
           [ ${{ needs.lint.result }} == success ] &&
-          [ ${{ needs.autobahn-tests.result }} == success ] &&
           [ ${{ needs.main-tests.result }} == success ] || exit 1
