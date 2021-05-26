@@ -37,7 +37,7 @@ blocks:
           - name: main
             image: 'registry.semaphoreci.com/rust:1.51'
           - name: python
-            image: 'registry.semaphoreci.com/python:2'
+            image: 'python:2'
       jobs:
         - name: Test with Autobahn test suite
           commands:
