@@ -1,0 +1,107 @@
+name: Test
+
+on:
+  push:
+    pull_request:
+    branches:
+      - staging
+      - trying
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-wasi
+          override: true
+          components: rustfmt, clippy
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-
+      - name: Check formatting
+        run: cargo fmt -- --check
+      - name: Lint
+        run: cargo clippy -- -D warnings
+
+  main-tests:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Lunatic
+        run: |
+          brew tap lunatic-solutions/lunatic
+          brew install lunatic
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+          target: wasm32-wasi
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-
+      - name: Run tests
+        run: cargo test
+
+  autobahn-tests:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Lunatic
+        run: |
+          brew tap lunatic-solutions/lunatic
+          brew install lunatic
+      - name: Install docker
+        run: |
+          mkdir -p ~/.docker/machine/cache
+          curl -Lo ~/.docker/machine/cache/boot2docker.iso https://github.com/boot2docker/boot2docker/releases/download/v19.03.12/boot2docker.iso
+          brew install docker docker-machine
+          docker-machine create --driver virtualbox default
+          docker-machine env default
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+          target: wasm32-wasi
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-
+      - run: eval "$(docker-machine env default)" && ./scripts/ci_server_test.sh
+
+  bors-report:
+    runs-on: ubuntu-latest
+
+    needs:
+      - main-tests
+      - autobahn-tests
+      - lint
+
+    steps:
+      - name: Check
+        run: |
+          [ ${{ needs.lint.result }} == success ] &&
+          [ ${{ needs.autobahn-tests.result }} == success ] &&
+          [ ${{ needs.main-tests.result }} == success ] || exit 1

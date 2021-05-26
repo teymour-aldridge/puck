@@ -19,14 +19,14 @@ function test_diff() {
     fi
 }
 
-cargo build --bin echo
+cargo build --release --bin echo
 
-cargo run --bin echo & WSSERVER_PID=$!
+cargo run --release --bin echo & WSSERVER_PID=$!
 
 docker run --rm \
     -v "${PWD}/autobahn:/autobahn" \
     --network host \
     crossbario/autobahn-testsuite \
-    wstest -m fuzzingclient -s './${PWD}/autobahn/fuzzingclient.json'
+    wstest -m fuzzingclient -s './autobahn/fuzzingclient.json'
 
 test_diff
