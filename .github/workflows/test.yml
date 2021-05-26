@@ -89,7 +89,7 @@ jobs:
           key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
           restore-keys: |
             cargo-${{ runner.os }}-
-      - run: eval "$(docker-machine env default)" && ./scripts/ci_server_test.sh
+      - run: eval "$(docker-machine env default)" && ./scripts/server_test.sh
 
   bors-report:
     runs-on: ubuntu-latest
