@@ -85,7 +85,6 @@ jobs:
 
     needs:
       - main-tests
-      - autobahn-tests
       - lint
 
     steps:
