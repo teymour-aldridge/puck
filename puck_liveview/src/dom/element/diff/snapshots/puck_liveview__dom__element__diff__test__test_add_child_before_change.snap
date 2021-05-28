@@ -1,0 +1,21 @@
+---
+source: puck_liveview/src/dom/element/diff/test.rs
+expression: c
+
+---
+Changeset {
+    ops: [
+        Op {
+            id: "0-0-",
+            instruction: SetId {
+                value: "0-1-",
+            },
+        },
+        Op {
+            id: "0-0-",
+            instruction: InsertBefore {
+                before_id: "0-1-",
+            },
+        },
+    ],
+}

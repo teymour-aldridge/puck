@@ -1,11 +1,12 @@
 use log::trace;
 use lunatic::net::TcpStream;
+use serde::{Deserialize, Serialize};
 
 use crate::ws::frame::Frame;
 
 use super::frame::{OpCode, ParseFrameError};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Message {
     Ping(Option<Vec<u8>>),
     Pong(Option<Vec<u8>>),

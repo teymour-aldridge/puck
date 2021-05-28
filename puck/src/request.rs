@@ -9,7 +9,7 @@ use std::{
 use lunatic::net::TcpStream;
 use url::Url;
 
-const MAX_HEADERS: usize = 16;
+const MAX_HEADERS: usize = 20;
 const NEW_LINE: u8 = b'\n';
 
 /// A HTTP request.

@@ -1,5 +1,5 @@
 [package]
-name = "puck"
+name = "liveview"
 version = "0.1.0"
 authors = ["teymour-aldridge <teymour.aldridge@icloud.com>"]
 edition = "2018"
@@ -7,15 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.38"
-httparse = "1.3.5"
-lunatic = "0.3.10"
-thiserror = "1.0.24"
-puck_codegen = { path = "../puck_codegen" }
-url = "2.2.1"
-derivative = "2.2.0"
-sha-1 = "0.9.6"
-base64 = "0.13.0"
-byteorder = "1.4.3"
-log = "0.4.14"
+chrono = { version = "0.4.19", features = ["serde"] }
+maplit = "1.0.2"
+puck = { path = "../../puck" }
+puck_liveview = { path = "../../puck_liveview" }
 serde = { version = "1.0.126", features = ["derive"] }
