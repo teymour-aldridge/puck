@@ -1,0 +1,50 @@
+---
+source: puck_liveview/src/html/mod.rs
+expression: output
+
+---
+Element {
+    id: [
+        0,
+    ],
+    name: "div",
+    attributes: {},
+    listeners: [],
+    children: [
+        Element {
+            id: [
+                0,
+                0,
+            ],
+            name: "h1",
+            attributes: {},
+            listeners: [],
+            children: [],
+            text: Some(
+                "Heading 1",
+            ),
+            key: None,
+        },
+        Element {
+            id: [
+                0,
+                1,
+            ],
+            name: "input",
+            attributes: {
+                "type": "submit",
+            },
+            listeners: [
+                ListenerRef {
+                    listener_name: "a_listener",
+                    js_event: "click",
+                },
+            ],
+            children: [],
+            text: None,
+            key: None,
+        },
+    ],
+    text: None,
+    key: None,
+}

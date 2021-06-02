@@ -1,0 +1,51 @@
+---
+source: puck_liveview/src/html/mod.rs
+expression: output
+
+---
+Element {
+    id: [
+        0,
+        0,
+        0,
+    ],
+    name: "form",
+    attributes: {},
+    listeners: [],
+    children: [
+        Element {
+            id: [
+                0,
+                0,
+                0,
+                0,
+            ],
+            name: "input",
+            attributes: {
+                "type": "text",
+            },
+            listeners: [],
+            children: [],
+            text: None,
+            key: None,
+        },
+        Element {
+            id: [
+                0,
+                0,
+                0,
+                1,
+            ],
+            name: "input",
+            attributes: {
+                "type": "submit",
+            },
+            listeners: [],
+            children: [],
+            text: None,
+            key: None,
+        },
+    ],
+    text: None,
+    key: None,
+}

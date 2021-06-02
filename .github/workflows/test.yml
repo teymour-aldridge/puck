@@ -64,8 +64,8 @@ jobs:
           override: false
           target: wasm32-wasi
       - uses: Swatinem/rust-cache@v1
-      - name: Run DOM diffing tests
-        run: (cd puck_liveview && cargo test test_diffing)
+      - name: Run native tests
+        run: (cd puck_liveview && cargo test)
 
   # Anyone who can fix this gets a metaphorical gold star.
   #
