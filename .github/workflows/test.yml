@@ -68,8 +68,9 @@ jobs:
           override: true
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: wasm32-wasi
+          toolchain: stable
           override: false
+          target: wasm32-wasi
       - name: Run DOM diffing tests
         run: (cd puck_liveview && cargo test test_diffing)
 
