@@ -45,7 +45,25 @@ fn test_single_element_attribute_change() {
 
     let cs = old.diff(Some(&new));
 
-    insta::assert_debug_snapshot!("test_single_element_attribute_change", cs);
+    assert_eq!(cs.ops.len(), 2);
+    assert!(cs.ops.iter().any(|op| {
+        match &op.instruction {
+            crate::dom::element::diff::changeset::Instruction::SetAttribute { key, value } => {
+                key.to_string() == "new-attribute-added-after-diffing".to_string()
+                    && value.to_string() == "value".to_string()
+            }
+            _ => false,
+        }
+    }));
+    assert!(cs.ops.iter().any(|op| {
+        match &op.instruction {
+            crate::dom::element::diff::changeset::Instruction::SetAttribute { key, value } => {
+                key.to_string() == "class".to_string()
+                    && value.to_string() == "two".to_string()
+            }
+            _ => false,
+        }
+    }));
 }
 
 #[test]
