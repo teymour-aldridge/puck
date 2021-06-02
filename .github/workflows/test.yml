@@ -56,6 +56,19 @@ jobs:
       - name: Run tests
         run: cargo test
 
+  native-diffing-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Lunatic
+        run: curl https://i.jpillora.com/lunatic-solutions/lunatic@v0.3.1! | sudo bash
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: Run DOM diffing tests
+        run: cargo test test_diffing
+
 # Anyone who can fix this gets a metaphorical gold star.
 #
 #  autobahn-tests:
@@ -86,9 +99,11 @@ jobs:
     needs:
       - main-tests
       - lint
+      - native-diffing-tests
 
     steps:
       - name: Check
         run: |
           [ ${{ needs.lint.result }} == success ] &&
+          [ ${{ needs.native-diffing-tests.result }} == success ] &&
           [ ${{ needs.main-tests.result }} == success ] || exit 1

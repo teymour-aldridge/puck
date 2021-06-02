@@ -84,22 +84,6 @@ mod test {
     }
 
     #[test]
-    fn sanity_checks() {
-        lunatic::Process::spawn_with((), proc).detach();
-        fn inner(_: ()) {
-            let mut stream = lunatic::net::TcpStream::connect("127.0.0.1:5050").unwrap();
-            write!(stream, "GET / HTTP/1.1\r\nHost: localhost:5050\r\nUser-Agent: curl/7.64.1\r\nAccept: */*\r\n\r\n").unwrap();
-            let mut string = String::new();
-            stream.read_to_string(&mut string).unwrap();
-            assert_eq!(
-                string,
-                "HTTP/1.1 200 success\r\nContent-Type: text/html;charset=utf-8\r\n\r\nhttp://localhost:5050/"
-                .to_string()
-            );
-        }
-        lunatic::Process::spawn_with((), inner).detach();
-    }
-    #[test]
     fn test_channels() {
         lunatic::Process::spawn_with((), proc).detach();
         fn inner(_: ()) {
@@ -113,7 +97,7 @@ mod test {
             stream.read_to_string(&mut string).unwrap();
             assert_eq!(
                 string,
-                "HTTP/1.1 200 \r\nContent-Type: text/plain;charset=utf-8\r\n\r\nSubmitted"
+                "HTTP/1.1 200 success\r\nContent-Type: text/plain;charset=utf-8\r\n\r\nSubmitted"
             );
 
             let mut stream = lunatic::net::TcpStream::connect("127.0.0.1:5050").unwrap();

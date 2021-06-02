@@ -1,7 +1,8 @@
 pub(crate) mod changeset;
 
 #[cfg(test)]
-mod test;
+#[cfg(not(target_arch="wasm32"))]
+mod test_diffing;
 
 use std::borrow::Cow;
 
