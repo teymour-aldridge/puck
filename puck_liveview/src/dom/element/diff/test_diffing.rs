@@ -58,8 +58,7 @@ fn test_single_element_attribute_change() {
     assert!(cs.ops.iter().any(|op| {
         match &op.instruction {
             crate::dom::element::diff::changeset::Instruction::SetAttribute { key, value } => {
-                key.to_string() == "class".to_string()
-                    && value.to_string() == "two".to_string()
+                key.to_string() == "class".to_string() && value.to_string() == "two".to_string()
             }
             _ => false,
         }
