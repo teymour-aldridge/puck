@@ -44,15 +44,7 @@ jobs:
           toolchain: stable
           override: true
           target: wasm32-wasi
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
-          restore-keys: |
-            cargo-${{ runner.os }}-
+      - uses: Swatinem/rust-cache@v1
       - name: Run tests
         run: cargo test
 
@@ -71,32 +63,33 @@ jobs:
           toolchain: stable
           override: false
           target: wasm32-wasi
+      - uses: Swatinem/rust-cache@v1
       - name: Run DOM diffing tests
         run: (cd puck_liveview && cargo test test_diffing)
 
-# Anyone who can fix this gets a metaphorical gold star.
-#
-#  autobahn-tests:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Install Lunatic
-#        run: curl https://i.jpillora.com/lunatic-solutions/lunatic@v0.3.1! | sudo bash
-#      - uses: actions-rs/toolchain@v1
-#        with:
-#          toolchain: stable
-#          override: true
-#          target: wasm32-wasi
-#      - uses: actions/cache@v2
-#        with:
-#          path: |
-#            ~/.cargo/registry
-#            ~/.cargo/git
-#            target
-#          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
-#          restore-keys: |
-#            cargo-${{ runner.os }}-
-#      - run: ./scripts/server_test.sh
+  # Anyone who can fix this gets a metaphorical gold star.
+  #
+  #  autobahn-tests:
+  #    runs-on: ubuntu-latest
+  #    steps:
+  #      - uses: actions/checkout@v2
+  #      - name: Install Lunatic
+  #        run: curl https://i.jpillora.com/lunatic-solutions/lunatic@v0.3.1! | sudo bash
+  #      - uses: actions-rs/toolchain@v1
+  #        with:
+  #          toolchain: stable
+  #          override: true
+  #          target: wasm32-wasi
+  #      - uses: actions/cache@v2
+  #        with:
+  #          path: |
+  #            ~/.cargo/registry
+  #            ~/.cargo/git
+  #            target
+  #          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
+  #          restore-keys: |
+  #            cargo-${{ runner.os }}-
+  #      - run: ./scripts/server_test.sh
 
   bors-report:
     runs-on: ubuntu-latest
