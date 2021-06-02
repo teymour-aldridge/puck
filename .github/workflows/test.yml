@@ -67,7 +67,7 @@ jobs:
           toolchain: stable
           override: true
       - name: Run DOM diffing tests
-        run: cargo test test_diffing
+        run: (cd puck_liveview && cargo test test_diffing)
 
 # Anyone who can fix this gets a metaphorical gold star.
 #
