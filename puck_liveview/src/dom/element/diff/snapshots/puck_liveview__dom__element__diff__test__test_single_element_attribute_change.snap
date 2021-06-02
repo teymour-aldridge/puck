@@ -1,0 +1,23 @@
+---
+source: puck_liveview/src/dom/element/diff/test.rs
+expression: cs
+
+---
+Changeset {
+    ops: [
+        Op {
+            id: "0-",
+            instruction: SetAttribute {
+                key: "class",
+                value: "two",
+            },
+        },
+        Op {
+            id: "0-",
+            instruction: SetAttribute {
+                key: "new-attribute-added-after-diffing",
+                value: "value",
+            },
+        },
+    ],
+}

@@ -1,2 +1,9 @@
 [workspace]
-members = ["puck", "puck_codegen", "examples/server", "examples/echo"]
+members = [
+    "puck",
+    "puck_codegen",
+    "puck_liveview",
+    "examples/server",
+    "examples/echo",
+    "examples/liveview",
+]

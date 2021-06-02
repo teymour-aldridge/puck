@@ -6,3 +6,10 @@ target/
 Cargo.lock
 # autobahn test suite
 autobahn/server
+# fable
+.fable
+.package-lock.json
+node_modules
+
+.fake
+.ionide

@@ -83,7 +83,8 @@ impl Channels {
                         if !success {
                             return;
                         } else {
-                            #function(request, stream #extra_args)
+                            #function(request, stream #extra_args);
+                            return;
                         }
                     }
                 }
