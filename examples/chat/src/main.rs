@@ -50,6 +50,7 @@ use puck_liveview::{
         listener::{Listener, ListenerRef},
     },
     init::{index, js},
+    prelude::*,
 };
 use serde::{Deserialize, Serialize};
 
@@ -160,112 +161,38 @@ impl Component<(UserChatData, Sender<SubscribeMsg>), InputMsg> for Root {
 
     fn render(&self) -> (Element, HashMap<String, Listener<InputMsg>>) {
         // as you can see, the API needs some work
+
         (
-            Element {
-                id: vec![0],
-                name: "div".into(),
-                attributes: hashmap! {
-                    "class".into() => "message-list".into()
-                },
-                listeners: vec![],
-                children: vec![
-                    Element {
-                        id: vec![0, 0],
-                        name: std::borrow::Cow::Borrowed("div"),
-                        attributes: hashmap! {},
-                        listeners: vec![],
-                        children: vec![Element {
-                            id: vec![0, 0, 0],
-                            name: std::borrow::Cow::Borrowed("input"),
-                            attributes: hashmap! {},
-                            listeners: vec![ListenerRef::new("msg-input", "input")],
-                            children: vec![],
-                            text: None,
-                            key: None,
-                        }],
-                        text: None,
-                        key: None,
-                    },
-                    Element {
-                        id: vec![0, 1],
-                        name: std::borrow::Cow::Borrowed("div"),
-                        attributes: hashmap! {},
-                        listeners: vec![],
-                        children: vec![Element {
-                            id: vec![0, 1, 0],
-                            name: std::borrow::Cow::Borrowed("button"),
-                            attributes: hashmap! {},
-                            listeners: vec![ListenerRef::new("msg-submit", "click")],
-                            children: vec![],
-                            text: Some(std::borrow::Cow::Borrowed("Send message")),
-                            key: None,
-                        }],
-                        text: None,
-                        key: None,
-                    },
-                ]
-                .into_iter()
-                .chain(
-                    self.data
-                        .messages
-                        .iter()
-                        .enumerate()
-                        .map(|(index, message)| Element {
-                            id: vec![0, index as u32 + 2],
-                            name: "div".into(),
-                            attributes: hashmap! {
-                                "class".into() => "message-container".into()
-                            },
-                            listeners: vec![],
-                            children: vec![
-                                Element {
-                                    id: vec![0, index as u32 + 2, 0],
-                                    name: "p".into(),
-                                    attributes: hashmap! {
-                                        "class".into() => "message-sent-at".into()
-                                    },
-                                    listeners: vec![],
-                                    children: vec![],
-                                    text: Some(
-                                        message
-                                            .sent_at
-                                            .format("%Y-%m-%d %H:%M:%S")
-                                            .to_string()
-                                            .into(),
-                                    ),
-                                    key: None,
-                                },
-                                Element {
-                                    id: vec![0, index as u32 + 2, 1],
-                                    name: "p".into(),
-                                    attributes: hashmap! {
-                                        "class".into() => "message-author".into()
-                                    },
-                                    listeners: vec![],
-                                    children: vec![],
-                                    text: Some(message.from.clone().into()),
-                                    key: None,
-                                },
-                                Element {
-                                    id: vec![0, index as u32 + 2, 2],
-                                    name: "p".into(),
-                                    attributes: hashmap! {
-                                        "class".into() => "message-contents".into()
-                                    },
-                                    listeners: vec![],
-                                    children: vec![],
-                                    text: Some(message.contents.clone().into()),
-                                    key: None,
-                                },
-                            ],
-                            text: None,
-                            key: None,
-                        }),
+            Div::new()
+                .wrap()
+                .child(
+                    Div::new().wrap().child(
+                        Input::new()
+                            .attribute(Type::Text)
+                            .wrap()
+                            .listener(ListenerRef::new("msg-input", "input")),
+                    ),
                 )
-                .collect(),
-                text: None,
-                key: None,
-            },
+                .child(
+                    Div::new().wrap().child(
+                        Input::new()
+                            .attribute(Type::Submit)
+                            .wrap()
+                            .listener(ListenerRef::new("msg-submit", "click")),
+                    ),
+                )
+                .children(self.data.messages.iter().map(|message| {
+                    Div::new()
+                        .attribute(Class::from("message-container"))
+                        .wrap()
+                        .child(
+                            P::with_text(message.sent_at.format("%Y-%m-%d %H:%M:%S").to_string())
+                                .wrap(),
+                        )
+                        .child(P::with_text(format!("Sent by: {}", message.from.clone())).wrap())
+                        .child(P::with_text(message.contents.clone()).wrap())
+                }))
+                .into_element(vec![0]),
             hashmap! {
                 "msg-input".to_string() => Listener::Input {
                     call: Box::new(|e: InputEvent| {

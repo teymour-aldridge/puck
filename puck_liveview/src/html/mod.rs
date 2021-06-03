@@ -209,9 +209,14 @@ impl WrappedBodyNode {
         self.children.push(child.into());
         self
     }
+
+    pub fn children(mut self, children: impl IntoIterator<Item = WrappedBodyNode>) -> Self {
+        self.children.extend(children);
+        self
+    }
 }
 
-trait IntoWrappedBodyNode {
+pub trait IntoWrappedBodyNode {
     fn wrap(self) -> WrappedBodyNode;
 }
 
