@@ -5,5 +5,5 @@ members = [
     "puck_liveview",
     "examples/server",
     "examples/echo",
-    "examples/liveview",
+    "examples/chat",
 ]
