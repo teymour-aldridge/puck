@@ -21,4 +21,4 @@ jobs:
           target: wasm32-wasi
       - uses: Swatinem/rust-cache@v1
       - name: Fuzzing
-        run: ./scripts/proptest.sh
+        run: ./scripts/proptest.sh --target x86_64-unknown-linux-gnu
