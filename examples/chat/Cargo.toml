@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 chrono = { version = "0.4.19", features = ["serde"] }
+lunatic = "0.3.10"
 maplit = "1.0.2"
 puck = { path = "../../puck" }
 puck_liveview = { path = "../../puck_liveview" }

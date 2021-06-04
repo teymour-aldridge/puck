@@ -1,13 +1,14 @@
+use std::io::{Read, Write};
+
 use log::trace;
-use lunatic::net::TcpStream;
 
 use super::{frame::Frame, message::Message, send::send_frame};
 
 #[derive(Derivative, Clone)]
 #[derivative(Debug)]
-pub struct WebSocket {
+pub struct WebSocket<S: Read + Write + Clone> {
     #[derivative(Debug = "ignore")]
-    stream: TcpStream,
+    stream: S,
     state: WebSocketState,
 }
 
@@ -17,8 +18,11 @@ pub enum WebSocketState {
     Closed,
 }
 
-impl WebSocket {
-    pub fn new(stream: TcpStream) -> Self {
+impl<S> WebSocket<S>
+where
+    S: Read + Write + Clone,
+{
+    pub fn new(stream: S) -> Self {
         Self {
             stream,
             state: WebSocketState::Open,
@@ -26,7 +30,7 @@ impl WebSocket {
     }
 }
 
-impl Iterator for WebSocket {
+impl<S: Read + Write + Clone> Iterator for WebSocket<S> {
     type Item = Result<Message, NextMessageError>;
 
     fn next(&mut self) -> Option<Result<Message, NextMessageError>> {
@@ -65,7 +69,10 @@ impl Iterator for WebSocket {
     }
 }
 
-impl Drop for WebSocket {
+impl<S> Drop for WebSocket<S>
+where
+    S: Read + Write + Clone,
+{
     fn drop(&mut self) {
         match self.state {
             WebSocketState::Open => {
@@ -84,7 +91,7 @@ pub enum NextMessageError {
     ConnectionClosed,
 }
 
-fn send_close_frame(stream: TcpStream) {
+fn send_close_frame(stream: impl Write) {
     trace!("Sending close frame");
     send_frame(
         stream,

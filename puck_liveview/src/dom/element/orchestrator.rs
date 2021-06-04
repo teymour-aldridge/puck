@@ -1,13 +1,12 @@
 use std::{collections::HashMap, mem};
 
-use puck::{
-    lunatic::{
-        channel::{Receiver, Sender},
-        net::TcpStream,
-        Process,
-    },
-    ws::{message::Message, send::send},
+use lunatic::{
+    channel::{Receiver, Sender},
+    net::TcpStream,
+    Process,
 };
+
+use puck::ws::{message::Message, send::send};
 use serde::{Deserialize, Serialize};
 
 use crate::{

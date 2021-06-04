@@ -1,7 +1,7 @@
 //! A WebSocket echo server.
 
+use lunatic::net::TcpStream;
 use puck::{
-    lunatic::net::TcpStream,
     request::Body,
     serve,
     ws::{message::Message, send::send, websocket::WebSocket},
@@ -39,5 +39,5 @@ pub fn home(_: Request) -> Response {
 pub struct App;
 
 fn main() {
-    serve::<App>("127.0.0.1:5051").expect("error running server");
+    serve::<App, &str>("127.0.0.1:5051").expect("error running server");
 }

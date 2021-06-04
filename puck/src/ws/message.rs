@@ -1,5 +1,6 @@
+use std::io::Read;
+
 use log::trace;
-use lunatic::net::TcpStream;
 use serde::{Deserialize, Serialize};
 
 use crate::ws::frame::Frame;
@@ -15,7 +16,7 @@ pub enum Message {
 }
 
 impl Message {
-    pub fn next(stream: TcpStream) -> Result<Self, DecodeMessageError> {
+    pub fn next(stream: impl Read + Clone) -> Result<Self, DecodeMessageError> {
         log::trace!("trying to parse next message");
         let first = Frame::parse(stream.clone())?;
 

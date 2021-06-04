@@ -219,11 +219,10 @@ impl From<Message> for Frame {
 mod test_parse_frames {
     use std::io::Cursor;
 
-    use lunatic::Process;
-
     use crate::ws::frame::Frame;
 
-    fn test_parse_frames(_: ()) {
+    #[test]
+    fn test_parse_frames() {
         assert_eq!(
             Frame::parse(Cursor::new([137, 0,])).unwrap(),
             Frame {
@@ -247,10 +246,5 @@ mod test_parse_frames {
                 decoded: vec![]
             }
         );
-    }
-
-    #[test]
-    fn test() {
-        Process::spawn_with((), test_parse_frames).join().unwrap();
     }
 }

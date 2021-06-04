@@ -1,7 +1,5 @@
 use std::io::Write;
 
-use lunatic::net::TcpStream;
-
 use crate::Response;
 
 #[derive(Debug)]
@@ -13,7 +11,7 @@ impl Encoder {
     pub fn new(response: Response) -> Self {
         Self { response }
     }
-    pub fn write_tcp_stream(&mut self, mut stream: TcpStream) -> std::io::Result<()> {
+    pub fn write_tcp_stream(&mut self, mut stream: impl Write) -> std::io::Result<()> {
         write!(
             stream,
             "HTTP/1.1 {} {}\r\n",

@@ -110,8 +110,8 @@ impl Channels {
             .map(|item| {
                 let ty = format_ident!("{}", &item.message_type);
                 quote! {
-                    ::puck::lunatic::channel::Sender<#ty>,
-                    ::puck::lunatic::channel::Receiver<#ty>
+                    ::lunatic::channel::Sender<#ty>,
+                    ::lunatic::channel::Receiver<#ty>
                 }
             })
             .fold(quote! {}, |a, b| quote! {#a #b})
@@ -158,16 +158,16 @@ impl ToTokens for Channels {
                     let receive_name = format_ident!("receive_{}", channel_name);
                     let res = quote! {
                         let (#send_name, #receive_name):
-                            (::puck::lunatic::channel::Sender<#ty>,
-                             ::puck::lunatic::channel::Receiver<#ty>) =
-                             ::puck::lunatic::channel::unbounded();
+                            (::lunatic::channel::Sender<#ty>,
+                             ::lunatic::channel::Receiver<#ty>) =
+                             ::lunatic::channel::unbounded();
                     };
 
                     if let Some(ref supervisor) = channel.supervisor {
                         let ident = format_ident!("{}", supervisor);
                         quote! {
                             #res
-                            ::puck::lunatic::Process::spawn_with(
+                            ::lunatic::Process::spawn_with(
                                 (#send_name.clone(), #receive_name.clone()),
                                 #ident
                             ).detach();
