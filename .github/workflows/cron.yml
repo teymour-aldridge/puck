@@ -22,7 +22,7 @@ jobs:
       - uses: Swatinem/rust-cache@v1
       - name: tests
         run: ./scripts/proptest.sh --target x86_64-unknown-linux-gnu
-      - name: collect results results
+      - name: collect results
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
