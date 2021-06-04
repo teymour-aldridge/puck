@@ -3,7 +3,7 @@ name: Exciting tests run in the middle of the night to catch extra bugs
 on:
   pull_request:
   schedule:
-    - cron: '0 0 * * *'  # every day at midnight (spooky :D)
+    - cron: "0 0 * * *" # every day at midnight (spooky :D)
 
 jobs:
   puck_property_testing:
@@ -20,5 +20,12 @@ jobs:
           override: false
           target: wasm32-wasi
       - uses: Swatinem/rust-cache@v1
-      - name: Fuzzing
+      - name: tests
         run: ./scripts/proptest.sh --target x86_64-unknown-linux-gnu
+      - name: collect results results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: http-parsing-witnesses
+          path: |
+            /home/runner/work/puck/puck/puck/tests/*
