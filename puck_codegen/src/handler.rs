@@ -54,8 +54,8 @@ pub fn handler(args: TokenStream, input: TokenStream) -> TokenStream {
 
     let res: TokenStream = From::from(quote! {
         #derive
-        fn __inner_request_handler((stream, #call): (::puck::lunatic::net::TcpStream, #tys)) {
-            let request = match ::puck::Request::parse(&stream)
+        fn __inner_request_handler((stream, #call): (::lunatic::net::TcpStream, #tys)) {
+            let request = match ::puck::Request::parse(stream.clone())
                     .expect("could not parse request") {
                         Some(t) => t,
                         None => {
@@ -77,11 +77,11 @@ pub fn handler(args: TokenStream, input: TokenStream) -> TokenStream {
         }
 
         impl ::puck::Handler for #ident {
-            fn handle(addr: &'static str) -> ::puck::anyhow::Result<()> {
-                let conn = ::puck::lunatic::net::TcpListener::bind(addr)?;
+            fn handle<ADDRESS: std::net::ToSocketAddrs>(addr: ADDRESS) -> ::puck::anyhow::Result<()> {
+                let conn = ::lunatic::net::TcpListener::bind(addr)?;
                 #channels
                 while let Ok(stream) = conn.accept() {
-                    ::puck::lunatic::Process::spawn_with((stream, #call_clone), __inner_request_handler)
+                    ::lunatic::Process::spawn_with((stream, #call_clone), __inner_request_handler)
                         .detach();
                 }
                 Ok(())

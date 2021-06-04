@@ -2,7 +2,7 @@
 
 #![deny(missing_debug_implementations, unused_must_use)]
 
-use std::collections::HashMap;
+use std::{collections::HashMap, io::Write, net::ToSocketAddrs};
 
 #[macro_use]
 extern crate derivative;
@@ -10,13 +10,11 @@ extern crate derivative;
 pub use puck_codegen::handler;
 
 pub use anyhow;
-pub use lunatic;
 pub use request::Request;
 pub use response::Response;
 
 use encoder::Encoder;
-use lunatic::net::TcpStream;
-use request::{Body, Method, HTML};
+use request::{Body, HTML};
 
 pub mod encoder;
 pub mod request;
@@ -24,10 +22,12 @@ pub mod response;
 pub mod ws;
 
 pub trait Handler {
-    fn handle(address: &'static str) -> anyhow::Result<()>;
+    fn handle<ADDRESS>(address: ADDRESS) -> anyhow::Result<()>
+    where
+        ADDRESS: ToSocketAddrs;
 }
 
-pub fn serve<H: Handler>(address: &'static str) -> anyhow::Result<()> {
+pub fn serve<H: Handler, ADDRESS: ToSocketAddrs>(address: ADDRESS) -> anyhow::Result<()> {
     H::handle(address)
 }
 
@@ -41,7 +41,6 @@ pub fn err_404(_: Request) -> Response {
         body: Body::from_string("<h1>404: Not found</h1>".to_string()),
         status: 404,
         reason: "not found".to_string(),
-        method: Method::Get,
     }
 }
 
@@ -55,11 +54,10 @@ pub fn err_400() -> Response {
         body: Body::from_string("<h1>400: bad request</h1>".to_string()),
         status: 400,
         reason: "bad request".to_string(),
-        method: Method::Get,
     }
 }
 
-pub fn write_response(res: Response, stream: TcpStream) {
+pub fn write_response(res: Response, stream: &mut impl Write) {
     let mut encoder = Encoder::new(res);
     encoder.write_tcp_stream(stream).unwrap();
 }

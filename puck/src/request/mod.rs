@@ -2,15 +2,16 @@ use std::{
     borrow::Cow,
     collections::HashMap,
     fmt::Display,
-    io::{BufRead, BufReader, Cursor, Read},
+    io::{self, BufRead, BufReader, Cursor, Read, Write},
     str::Utf8Error,
 };
 
-use lunatic::net::TcpStream;
 use url::Url;
 
-const MAX_HEADERS: usize = 20;
-const NEW_LINE: u8 = b'\n';
+pub mod builder;
+
+pub const MAX_HEADERS: usize = 20;
+pub const NEW_LINE: u8 = b'\n';
 
 /// A HTTP request.
 #[derive(Debug)]
@@ -22,11 +23,14 @@ pub struct Request {
 }
 
 impl Request {
-    pub fn parse(stream: &TcpStream) -> Result<Option<Self>, RequestParseError> {
+    pub fn build(url: impl AsRef<str>) -> builder::RequestBuilder {
+        builder::RequestBuilder::new(url)
+    }
+    pub fn parse(stream: impl Read + 'static) -> Result<Option<Self>, RequestParseError> {
         let mut headers = [httparse::EMPTY_HEADER; MAX_HEADERS];
         let mut req = httparse::Request::new(&mut headers);
 
-        let mut reader = BufReader::with_capacity(10000, stream.clone());
+        let mut reader = BufReader::with_capacity(10000, stream);
         let mut buf = Vec::new();
 
         loop {
@@ -47,7 +51,7 @@ impl Request {
         }
 
         let _ = req.parse(&buf)?;
-        let method = Method::new_from_str(req.method.ok_or(RequestParseError::CouldNotParse)?);
+        let method = Method::new_from_str(req.method.ok_or(RequestParseError::MissingMethod)?);
         let headers = {
             let mut map = HashMap::new();
             for header in req.headers.iter() {
@@ -61,7 +65,7 @@ impl Request {
 
         let url =
             if let Some((_, host)) = headers.iter().find(|(k, _)| k.eq_ignore_ascii_case("host")) {
-                let url = req.path.ok_or(RequestParseError::CouldNotParse)?;
+                let url = req.path.ok_or(RequestParseError::InvalidUrl)?;
                 if url.starts_with("http://") || url.starts_with("https://") {
                     Url::parse(url)
                 } else if url.starts_with('/') {
@@ -69,11 +73,11 @@ impl Request {
                 } else if req.method.unwrap().eq_ignore_ascii_case("connect") {
                     Url::parse(&format!("http://{}/", host))
                 } else {
-                    return Err(RequestParseError::CouldNotParse);
+                    return Err(RequestParseError::InvalidUrl);
                 }
-                .map_err(|_| RequestParseError::CouldNotParse)?
+                .map_err(|_| RequestParseError::InvalidUrl)?
             } else {
-                return Err(RequestParseError::CouldNotParse);
+                return Err(RequestParseError::MissingHeader("Host".to_string()));
             };
         let body = Body::from_reader(
             reader,
@@ -90,31 +94,51 @@ impl Request {
             url,
         }))
     }
+
+    pub fn write(&mut self, write: &mut impl Write) -> io::Result<()> {
+        self.method.write(write)?;
+        write!(write, " {} ", self.url.path())?;
+        write!(write, "HTTP/1.1\r\n")?;
+        for (key, value) in &self.headers {
+            write!(write, "{}: {}\r\n", key, value)?;
+        }
+        write!(write, "\r\n")?;
+
+        std::io::copy(&mut self.body, write).map(drop)
+    }
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum RequestParseError {
     #[error("could not parse")]
-    CouldNotParse,
+    CouldNotParse(httparse::Error),
+    #[error("utf8 error")]
+    Utf8Error(Utf8Error),
     #[error("io error")]
-    IoError,
+    IoError(io::Error),
+    #[error("the supplied url was invalid")]
+    InvalidUrl,
+    #[error("the `{0}` header is missing")]
+    MissingHeader(String),
+    #[error("missing method")]
+    MissingMethod,
 }
 
 impl From<std::io::Error> for RequestParseError {
-    fn from(_: std::io::Error) -> Self {
-        Self::IoError
+    fn from(e: std::io::Error) -> Self {
+        Self::IoError(e)
     }
 }
 
 impl From<httparse::Error> for RequestParseError {
-    fn from(_: httparse::Error) -> Self {
-        Self::CouldNotParse
+    fn from(e: httparse::Error) -> Self {
+        Self::CouldNotParse(e)
     }
 }
 
 impl From<Utf8Error> for RequestParseError {
-    fn from(_: Utf8Error) -> Self {
-        Self::CouldNotParse
+    fn from(e: Utf8Error) -> Self {
+        Self::Utf8Error(e)
     }
 }
 
@@ -135,10 +159,21 @@ impl Method {
             _ => Self::OtherMethod(str.to_string()),
         }
     }
+
+    pub fn write(&self, write: &mut impl Write) -> io::Result<()> {
+        let to_write = match self {
+            Method::Get => "GET",
+            Method::Post => "POST",
+            Method::Head => "HEAD /",
+            Method::OtherMethod(name) => name,
+        };
+        write!(write, "{}", to_write)
+    }
 }
 
 #[derive(Derivative)]
 #[derivative(Debug)]
+#[cfg_attr(feature = "fuzzing", derive(DefaultMutator, ToJson, FromJson))]
 pub struct Body {
     #[derivative(Debug = "ignore")]
     reader: Box<dyn BufRead + 'static>,

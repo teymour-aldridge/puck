@@ -1,8 +1,10 @@
+use std::io::Write;
+
 use base64::encode;
 use log::trace;
 use sha1::{Digest, Sha1};
 
-use crate::{err_400, lunatic::net::TcpStream, write_response, Response};
+use crate::{err_400, write_response, Response};
 
 pub fn should_upgrade(req: &crate::Request) -> bool {
     req.headers
@@ -23,7 +25,7 @@ const GUID: &str = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 ///
 /// Returns true if this is successful, and false if it is not. Automatically sends a 400 Bad
 /// Request response if the request fails.
-pub fn perform_upgrade(req: &crate::Request, stream: TcpStream) -> bool {
+pub fn perform_upgrade(req: &crate::Request, stream: &mut impl Write) -> bool {
     let key = match req.headers.get("Sec-WebSocket-Key") {
         Some(t) => t,
         None => {
@@ -58,22 +60,15 @@ fn compute_accept_header(key: String) -> String {
 }
 
 #[cfg(test)]
+#[cfg(not(target_arch = "wasm32"))]
 mod test {
-    use lunatic::Process;
-
     use crate::ws::upgrade::compute_accept_header;
 
-    fn test_compute_upgrade_header_inner(_: ()) {
+    #[test]
+    fn test_compute_upgrade_header() {
         assert_eq!(
             compute_accept_header("dGhlIHNhbXBsZSBub25jZQ==".to_string()),
             "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=".to_string()
         );
-    }
-
-    #[test]
-    fn test_compute_upgrade_header() {
-        Process::spawn_with((), test_compute_upgrade_header_inner)
-            .join()
-            .unwrap();
     }
 }

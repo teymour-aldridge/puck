@@ -55,7 +55,7 @@ use puck_liveview::{
 use serde::{Deserialize, Serialize};
 
 fn main() {
-    serve::<App>("127.0.0.1:5052").expect("server error");
+    serve::<App, &str>("127.0.0.1:5052").expect("server error");
 }
 
 #[puck::handler(

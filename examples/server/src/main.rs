@@ -1,6 +1,6 @@
+use lunatic::channel::{Receiver, Sender};
 use puck::{
-    lunatic::channel::{Receiver, Sender},
-    request::{Body, Method, HTML, PLAIN},
+    request::{Body, HTML, PLAIN},
     Request, Response,
 };
 use serde::{Deserialize, Serialize};
@@ -20,7 +20,6 @@ fn hello(req: Request) -> Response {
         .header("Content-Type", HTML)
         .body(Body::from_string(format!("<h1>Hello {}!</h1>", name)))
         .status(200, "success")
-        .method(Method::Get)
         .build()
 }
 
@@ -39,7 +38,6 @@ fn submit_info(req: Request, sender: Sender<Msg>) -> Response {
         .header("Content-Type", PLAIN)
         .body(Body::from_string("Submitted".to_string()))
         .status(200, "success")
-        .method(Method::Get)
         .build()
 }
 
@@ -50,7 +48,6 @@ fn read_info(_: Request, reader: Receiver<Msg>) -> Response {
             Msg::Send(msg) => msg,
         }))
         .status(200, "success")
-        .method(Method::Get)
         .build()
 }
 
@@ -70,14 +67,12 @@ fn echo_echo((_send, receive): (Sender<Msg>, Receiver<Msg>)) {
 pub struct App;
 
 fn main() {
-    puck::serve::<App>("127.0.0.1:5050").unwrap()
+    puck::serve::<App, &str>("127.0.0.1:5050").unwrap()
 }
 
 #[cfg(test)]
 mod test {
     use std::io::{Read, Write};
-
-    use puck::lunatic::{self};
 
     fn proc(_: ()) {
         super::main()
