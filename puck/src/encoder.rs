@@ -11,7 +11,7 @@ impl Encoder {
     pub fn new(response: Response) -> Self {
         Self { response }
     }
-    pub fn write_tcp_stream(&mut self, stream: &mut impl Write) -> std::io::Result<()> {
+    pub fn write_tcp_stream(&mut self, mut stream: impl Write) -> std::io::Result<()> {
         write!(
             stream,
             "HTTP/1.1 {} {}\r\n",
@@ -23,7 +23,7 @@ impl Encoder {
             write!(stream, "{}: {}\r\n", header, value)?;
         }
         write!(stream, "\r\n")?;
-        std::io::copy(&mut self.response.body, stream)?;
+        std::io::copy(&mut self.response.body, &mut stream)?;
         Ok(())
     }
 }

@@ -25,7 +25,7 @@ const GUID: &str = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 ///
 /// Returns true if this is successful, and false if it is not. Automatically sends a 400 Bad
 /// Request response if the request fails.
-pub fn perform_upgrade(req: &crate::Request, stream: &mut impl Write) -> bool {
+pub fn perform_upgrade(req: &crate::Request, stream: impl Write) -> bool {
     let key = match req.headers.get("Sec-WebSocket-Key") {
         Some(t) => t,
         None => {

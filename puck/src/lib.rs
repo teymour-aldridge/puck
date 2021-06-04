@@ -57,7 +57,7 @@ pub fn err_400() -> Response {
     }
 }
 
-pub fn write_response(res: Response, stream: &mut impl Write) {
+pub fn write_response(res: Response, stream: impl Write) {
     let mut encoder = Encoder::new(res);
     encoder.write_tcp_stream(stream).unwrap();
 }

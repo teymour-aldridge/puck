@@ -32,14 +32,12 @@
 use std::collections::HashMap;
 
 use chrono::{NaiveDateTime, Utc};
-use maplit::hashmap;
-use puck::{
-    lunatic::{
-        channel::{bounded, unbounded, Receiver, Sender},
-        net::TcpStream,
-    },
-    serve, Request,
+use lunatic::{
+    channel::{bounded, unbounded, Receiver, Sender},
+    net::TcpStream,
 };
+use maplit::hashmap;
+use puck::{serve, Request};
 use puck_liveview::{
     dom::{
         element::{

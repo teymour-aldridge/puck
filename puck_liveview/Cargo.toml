@@ -13,6 +13,7 @@ puck = { path = "../puck" }
 serde = { version = "1.0.126", features = ["derive"] }
 serde_json = "1.0.64"
 maplit = "1.0.2"
+lunatic = "0.3.10"
 
 [dev-dependencies]
 insta = "1.7.1"
