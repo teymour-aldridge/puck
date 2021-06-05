@@ -3,7 +3,7 @@ members = [
     "puck",
     "puck_codegen",
     "puck_liveview",
-    "examples/server",
-    "examples/echo",
     "examples/chat",
+    "examples/echo",
+    "examples/server",
 ]

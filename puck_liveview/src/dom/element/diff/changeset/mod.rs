@@ -2,6 +2,9 @@ use std::borrow::Cow;
 
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "apply")]
+pub mod apply;
+
 /// Javascript-friendly instruction serializer.
 pub(crate) mod instruction_serializer;
 

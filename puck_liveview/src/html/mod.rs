@@ -1,5 +1,3 @@
-use std::{borrow::Cow, collections::HashMap};
-
 use malvolio::prelude::BodyNode;
 use maplit::hashmap;
 
@@ -12,22 +10,13 @@ pub struct WrappedBodyNode {
     children: Vec<WrappedBodyNode>,
 }
 
-fn map_attributes(
-    attrs: impl IntoIterator<Item = (&'static str, Cow<'static, str>)>,
-) -> HashMap<Cow<'static, str>, Cow<'static, str>> {
-    attrs
-        .into_iter()
-        .map(|(a, b)| (Cow::Borrowed(a), b))
-        .collect()
-}
-
 macro_rules! map_heading_to_element {
     ($self:ident, $id:ident, $h:ident) => {{
         let $h = $h.into_pub_fields();
         Element {
             id: $id,
             name: std::borrow::Cow::Borrowed(stringify!($h)),
-            attributes: map_attributes($h.attrs),
+            attributes: $h.attrs,
             listeners: $self.listeners,
             // headings currently can't have children; this will be rectified in the future
             children: vec![],
@@ -96,7 +85,7 @@ impl WrappedBodyNode {
                 Element {
                     id: id.clone(),
                     name: std::borrow::Cow::Borrowed("form"),
-                    attributes: map_attributes(form.attrs),
+                    attributes: form.attrs,
                     listeners: self.listeners,
                     children: self
                         .children
@@ -122,7 +111,7 @@ impl WrappedBodyNode {
                 Element {
                     id: id.clone(),
                     name: std::borrow::Cow::Borrowed("div"),
-                    attributes: map_attributes(div.attrs),
+                    attributes: div.attrs,
                     listeners: self.listeners,
                     children: self
                         .children
@@ -139,7 +128,7 @@ impl WrappedBodyNode {
                 Element {
                     id: id.clone(),
                     name: std::borrow::Cow::Borrowed("a"),
-                    attributes: map_attributes(a.attrs),
+                    attributes: a.attrs,
                     listeners: self.listeners,
                     children: vec![],
                     text: Some(a.text),
@@ -151,7 +140,7 @@ impl WrappedBodyNode {
                 Element {
                     id: id.clone(),
                     name: std::borrow::Cow::Borrowed("input"),
-                    attributes: map_attributes(input.attrs),
+                    attributes: input.attrs,
                     listeners: self.listeners,
                     children: self
                         .children
@@ -171,7 +160,7 @@ impl WrappedBodyNode {
                 Element {
                     id: id.clone(),
                     name: std::borrow::Cow::Borrowed("div"),
-                    attributes: map_attributes(select.attrs),
+                    attributes: select.attrs,
                     listeners: self.listeners,
                     children: self
                         .children
@@ -202,7 +191,7 @@ impl WrappedBodyNode {
                 Element {
                     id: id.clone(),
                     name: std::borrow::Cow::Borrowed("img"),
-                    attributes: map_attributes(img.attrs),
+                    attributes: img.attrs,
                     listeners: self.listeners,
                     children: vec![],
                     text: None,
