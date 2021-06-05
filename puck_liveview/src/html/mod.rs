@@ -197,6 +197,18 @@ impl WrappedBodyNode {
                 }
             }
             BodyNode::Text(_) => panic!(""),
+            BodyNode::Img(img) => {
+                let img = img.into_pub_fields();
+                Element {
+                    id: id.clone(),
+                    name: std::borrow::Cow::Borrowed("img"),
+                    attributes: map_attributes(img.attrs),
+                    listeners: self.listeners,
+                    children: vec![],
+                    text: None,
+                    key: None,
+                }
+            }
         }
     }
 
