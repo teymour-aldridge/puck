@@ -49,6 +49,6 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
-          name: http-parsing-witnesses
+          name: liveview-diffing-witnesses
           path: |
             /home/runner/work/puck/puck/puck_liveview/tests/*
