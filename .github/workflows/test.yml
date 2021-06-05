@@ -65,7 +65,7 @@ jobs:
           target: wasm32-wasi
       - uses: Swatinem/rust-cache@v1
       - name: Run native tests
-        run: (cd puck_liveview && cargo test --features apply)
+        run: (cd puck_liveview && cargo test --features apply --target x86_64-unknown-linux-gnu)
 
   # Anyone who can fix this gets a metaphorical gold star.
   #
