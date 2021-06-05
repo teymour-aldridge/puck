@@ -8,12 +8,14 @@ mod test {
 
     fn ascii_headers() -> impl Strategy<Value = (Vec<(String, String)>, usize)> {
         // 19 because we add one!
-        prop::collection::vec(("[a-zA-Z][a-zA-Z-]+", "[a-zA-Z][a-zA-Z-]+"), 1..19).prop_flat_map(
-            |vec| {
-                let len = vec.len();
-                (Just(vec), 0..len)
-            },
+        prop::collection::vec(
+            ("[a-zA-Z][a-zA-Z-]*[a-zA-Z]", "[a-zA-Z][a-zA-Z-]*[a-zA-Z]"),
+            1..19,
         )
+        .prop_flat_map(|vec| {
+            let len = vec.len();
+            (Just(vec), 0..len)
+        })
     }
 
     proptest! {
