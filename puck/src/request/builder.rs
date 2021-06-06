@@ -8,22 +8,28 @@ use super::Method;
 
 #[derive(Debug)]
 pub struct RequestBuilder {
-    pub headers: HashMap<String, String>,
-    pub method: Option<Method>,
-    pub body: Option<Body>,
-    pub url: Url,
+    pub(crate) headers: HashMap<String, String>,
+    pub(crate) method: Option<Method>,
+    pub(crate) body: Option<Body>,
+    pub(crate) url: Url,
 }
 
 impl RequestBuilder {
     /// Construct a new `Request` pointing to the provided URL. If the URL is invalid, this method
     /// will panic.
     pub fn new(url: impl AsRef<str>) -> Self {
-        Self {
+        Self::try_new(url).expect("`RequestBuilder` failed to parse the provided URL")
+    }
+
+    /// Construct a new `Request` using the provided URL, returning an error if the URL is not
+    /// valid.
+    pub fn try_new(url: impl AsRef<str>) -> Result<Self, url::ParseError> {
+        Ok(Self {
             headers: HashMap::new(),
             method: None,
             body: None,
-            url: TryFrom::try_from(url.as_ref()).expect("invalid url supplied to `RequestBuilder`"),
-        }
+            url: TryFrom::try_from(url.as_ref())?,
+        })
     }
 
     /// Add a new HTTP header to this `Request`.
@@ -51,15 +57,28 @@ impl RequestBuilder {
         self
     }
 
-    /// Try to build this `Request`, panicking if it is not possible to do so.
+    /// Build this `Request`, and panic if it is not possible to do so.
     pub fn build(self) -> Request {
-        Request {
+        self.try_build()
+            .expect("a request method was not provided to `RequestBuilder`.")
+    }
+
+    /// Try to build this request, returning an error if the operation fails.
+    pub fn try_build(self) -> Result<Request, TryBuildError> {
+        Ok(Request {
             headers: self.headers,
             method: self
                 .method
-                .expect("a request method was not provided to `RequestBuilder`."),
+                .map(Ok)
+                .unwrap_or(Err(TryBuildError::MethodNotProvided))?,
             body: self.body.unwrap_or_else(Body::empty),
             url: self.url,
-        }
+        })
     }
+}
+
+#[derive(thiserror::Error, Debug, Clone)]
+pub enum TryBuildError {
+    #[error("method not provided")]
+    MethodNotProvided,
 }
