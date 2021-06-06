@@ -61,6 +61,9 @@ pub(crate) enum Instruction<'a> {
         key: Cow<'a, Cow<'static, str>>,
         value: Cow<'a, Cow<'static, str>>,
     },
+    RemoveAttribute {
+        key: Cow<'a, Cow<'static, str>>,
+    },
     SetId {
         value: String,
     },

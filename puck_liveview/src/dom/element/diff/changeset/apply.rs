@@ -136,6 +136,12 @@ impl<'a> Changeset<'a> {
                 } => {
                     panic!("you should not be calling this method from within this test")
                 }
+                super::Instruction::RemoveAttribute { key } => {
+                    Self::find_and_mutate(element, el_id, |el| {
+                        el.attributes
+                            .remove(&Self::crudely_remove_cow_lifetime_problems(key));
+                    })
+                }
             }
         }
     }

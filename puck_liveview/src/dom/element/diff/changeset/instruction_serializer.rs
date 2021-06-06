@@ -94,6 +94,10 @@ impl<'a, 'b> Serialize for JsFriendlyOpSerializer<'a, 'b> {
                 struct_serializer.serialize_field("ty", "insertBefore")?;
                 struct_serializer.serialize_field("payload", &before_id)?;
             }
+            Instruction::RemoveAttribute { key } => {
+                struct_serializer.serialize_field("ty", "removeAttr")?;
+                struct_serializer.serialize_field("payload", key)?;
+            }
         }
         struct_serializer.end()
     }

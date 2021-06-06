@@ -132,7 +132,19 @@ impl Element {
         let mut c = Changeset::empty();
 
         if self.attributes == other.attributes {
+            println!("returned early");
             return Changeset::empty();
+        }
+
+        for key in self.attributes.keys() {
+            if !other.attributes.contains_key(key) {
+                c.ops.push(Op {
+                    id: self.id(),
+                    instruction: Instruction::RemoveAttribute {
+                        key: Cow::Borrowed(key),
+                    },
+                })
+            }
         }
 
         for (their_key, their_value) in other.attributes.iter() {
