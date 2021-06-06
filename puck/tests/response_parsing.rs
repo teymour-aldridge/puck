@@ -1,8 +1,7 @@
 #[cfg(feature = "_test_fuzzing")]
 mod test {
-    use std::io::Cursor;
+    use std::{collections::HashMap, io::Cursor};
 
-    use itertools::Itertools;
     use proptest::prelude::*;
     use puck::{encoder::Encoder, request::Body, Response};
 
@@ -14,6 +13,8 @@ mod test {
         )
         .prop_flat_map(|vec| {
             let len = vec.len();
+            let map = vec.into_iter().collect::<HashMap<String, String>>();
+            let vec = map.into_iter().collect::<Vec<(String, String)>>();
             (Just(vec), 0..len)
         })
     }
@@ -59,15 +60,8 @@ mod test {
             "application/octet-stream".to_string(),
         ));
 
-        for ((input_key, input_value), (parsed_key, parsed_value)) in response
-            .headers()
-            .clone()
-            .into_iter()
-            .sorted_by(|(a, _), (b, _)| a.cmp(b))
-            .zip(headers.into_iter().sorted_by(|(a, _), (b, _)| a.cmp(b)))
-        {
-            assert_eq!(input_key, parsed_key);
-            assert_eq!(input_value, parsed_value);
+        for (a, b) in response.headers() {
+            assert!(headers.contains(&(a.clone(), b.clone())));
         }
     }
 }
