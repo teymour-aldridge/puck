@@ -4,7 +4,7 @@ use std::{
     str::Utf8Error,
 };
 
-use url::Url;
+use url::{ParseError, Url};
 
 use crate::body::Body;
 
@@ -23,9 +23,15 @@ pub struct Request {
 }
 
 impl Request {
-    /// Returns a builder to produce a new `Request` with.
+    /// Returns a builder to produce a new `Request` with. This method panics if the URL is not
+    /// valid.
     pub fn build(url: impl AsRef<str>) -> builder::RequestBuilder {
         builder::RequestBuilder::new(url)
+    }
+
+    /// Try to construct a builder from the provided URL, and return an error if the URL is invalid.
+    pub fn try_build(url: impl AsRef<str>) -> Result<builder::RequestBuilder, ParseError> {
+        builder::RequestBuilder::try_new(url)
     }
 
     /// Parse a `Request` from the provided stream (which must implement `Read` and be valid for
