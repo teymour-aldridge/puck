@@ -29,14 +29,20 @@ impl Response {
         self.copy_content_type_from_body();
         body
     }
+
+    /// Obtain this `Response`'s `Body`, replacing the existing `Body` with an empty `Body`.
     pub fn take_body(&mut self) -> Body {
         self.replace_body(Body::empty())
     }
 
+    /// Return a new `ResponseBuilder`, with which you can construct a new `Response`.
     pub fn build() -> ResponseBuilder {
         ResponseBuilder::new()
     }
 
+    /// Attempt to parse this `Response` from a stream (anything implementing `Read` that lives for
+    /// `static`.) Note that if the response is empty, this function will return Ok(None), rather
+    /// than an error.
     pub fn parse(stream: impl Read + 'static) -> Result<Option<Response>, ParseResponseError> {
         let mut reader = BufReader::with_capacity(1000, stream);
 
@@ -123,6 +129,7 @@ impl Response {
 }
 
 #[derive(thiserror::Error, Debug)]
+/// An error encountered when parsing a `Response`.
 pub enum ParseResponseError {
     #[error("io error")]
     IoError(io::Error),

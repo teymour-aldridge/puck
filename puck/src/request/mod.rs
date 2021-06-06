@@ -23,9 +23,16 @@ pub struct Request {
 }
 
 impl Request {
+    /// Returns a builder to produce a new `Request` with.
     pub fn build(url: impl AsRef<str>) -> builder::RequestBuilder {
         builder::RequestBuilder::new(url)
     }
+
+    /// Parse a `Request` from the provided stream (which must implement `Read` and be valid for
+    /// the `'static` lifetime.) This function will block until the `Request` has been parsed.
+    ///
+    /// Note that if the request is empty, this will not return an error – instead it will return
+    /// `Ok(None)`.
     pub fn parse(stream: impl Read + 'static) -> Result<Option<Self>, RequestParseError> {
         let mut headers = [httparse::EMPTY_HEADER; MAX_HEADERS];
         let mut req = httparse::Request::new(&mut headers);
@@ -79,6 +86,7 @@ impl Request {
             } else {
                 return Err(RequestParseError::MissingHeader("Host".to_string()));
             };
+
         let body = Body::from_reader(
             reader,
             headers
@@ -95,6 +103,8 @@ impl Request {
         }))
     }
 
+    /// Write this `Request` into the provided writer. Note that this will modify the `Request`
+    /// in-place; specifically, it will empty the contents of this `Request`'s body.
     pub fn write(&mut self, write: &mut impl Write) -> io::Result<()> {
         self.method.write(write)?;
         write!(write, " {} ", self.url.path())?;
@@ -109,6 +119,7 @@ impl Request {
 }
 
 #[derive(thiserror::Error, Debug)]
+/// An error encountered when trying to parse a request.
 pub enum RequestParseError {
     #[error("could not parse")]
     CouldNotParse(httparse::Error),
@@ -142,8 +153,8 @@ impl From<Utf8Error> for RequestParseError {
     }
 }
 
-/// The HTTP method.
 #[derive(PartialEq, Eq, Clone, Debug)]
+/// The HTTP method (e.g. "GET" or "POST")
 pub enum Method {
     Get,
     Post,
@@ -174,6 +185,8 @@ impl Method {
 #[derive(Derivative)]
 #[derivative(Debug)]
 #[cfg_attr(feature = "fuzzing", derive(DefaultMutator, ToJson, FromJson))]
+/// An HTTP `Body`. This struct contains an IO source, from which the `Body`'s contents can be read,
+/// as well as the MIME type of the contents of the `Body`.
 pub struct Body {
     #[derivative(Debug = "ignore")]
     reader: Box<dyn BufRead + 'static>,
@@ -192,6 +205,8 @@ impl Body {
         }
     }
 
+    /// Construct a new `Body` from the provided reader (which should implement `BufRead`). Note
+    /// that if you can, you should ideally supply `content_length`.
     pub fn from_reader(reader: impl BufRead + 'static, content_length: Option<usize>) -> Self {
         Self {
             reader: Box::new(reader),
@@ -201,6 +216,10 @@ impl Body {
         }
     }
 
+    /// Create a new `Body` from the provided string (this method accepts anything implementing
+    /// `Display`.)
+    ///
+    /// This method is equivalent to `From<String> for Body` or `From<&str> for Body`.
     pub fn from_string(string: impl ToString) -> Self {
         let string = string.to_string();
         let length = Some(string.len());
@@ -212,16 +231,30 @@ impl Body {
         }
     }
 
+    /// Reads from the underlying IO source, and returns the result as bytes (`Vec<u8>`).
     pub fn into_bytes(mut self) -> std::io::Result<Vec<u8>> {
         let mut buf = Vec::with_capacity(1024);
         self.read_to_end(&mut buf)?;
         Ok(buf)
     }
 
+    /// Reads from the underlying IO source, and returns the result as a `String`.
     pub fn into_string(mut self) -> std::io::Result<String> {
         let mut result = String::with_capacity(self.length.unwrap_or(0));
         self.read_to_string(&mut result)?;
         Ok(result)
+    }
+}
+
+impl From<String> for Body {
+    fn from(string: String) -> Self {
+        Body::from_string(string)
+    }
+}
+
+impl From<&str> for Body {
+    fn from(string: &str) -> Self {
+        Body::from_string(string)
     }
 }
 
@@ -244,6 +277,10 @@ impl Read for Body {
 /* This code comes from https://github.com/http-rs/http-types/blob/main/src/mime/parse.rs */
 
 #[derive(Debug, Clone)]
+/// The MIME type of a request.
+///
+/// See [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) for an
+/// introduction to how MIME-types work.
 pub struct Mime {
     pub(crate) essence: Cow<'static, str>,
     pub(crate) basetype: Cow<'static, str>,
@@ -300,7 +337,8 @@ pub const BYTE_STREAM: Mime = Mime {
     params: vec![],
 };
 
-/// Implementation of [WHATWG MIME serialization algorithm](https://mimesniff.spec.whatwg.org/#serializing-a-mime-type)
+/// Implementation of the
+//// [WHATWG MIME serialization algorithm](https://mimesniff.spec.whatwg.org/#serializing-a-mime-type)
 pub(crate) fn format(mime_type: &Mime, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     write!(f, "{}", &mime_type.essence)?;
     if mime_type.is_utf8 {
