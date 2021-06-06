@@ -67,6 +67,23 @@ jobs:
       - name: Run native tests
         run: (cd puck_liveview && cargo test --features apply --target x86_64-unknown-linux-gnu)
 
+  puck-native-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: false
+          target: wasm32-wasi
+      - uses: Swatinem/rust-cache@v1
+      - name: Run native tests
+        run: (cd puck && cargo test --target x86_64-unknown-linux-gnu)
+
   # Anyone who can fix this gets a metaphorical gold star.
   #
   #  autobahn-tests:
@@ -98,10 +115,12 @@ jobs:
       - main-tests
       - lint
       - native-diffing-tests
+      - puck-native-tests
 
     steps:
       - name: Check
         run: |
           [ ${{ needs.lint.result }} == success ] &&
           [ ${{ needs.native-diffing-tests.result }} == success ] &&
+          [ ${{ needs.puck-native-tests.result }} == success ] &&
           [ ${{ needs.main-tests.result }} == success ] || exit 1

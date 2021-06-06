@@ -7,6 +7,9 @@ use std::{collections::HashMap, io::Write, net::ToSocketAddrs};
 #[macro_use]
 extern crate derivative;
 
+#[cfg(test)]
+mod regressions;
+
 pub use puck_codegen::handler;
 
 pub use anyhow;
