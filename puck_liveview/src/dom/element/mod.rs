@@ -10,7 +10,7 @@ pub mod orchestrator;
 pub mod render;
 
 /// An HTML element.
-#[derive(Builder, Clone, Default, Debug)]
+#[derive(Builder, Clone, Default, Debug, Eq, PartialEq)]
 pub struct Element {
     /// The id includes the ID of this element and all the parent elements.
     ///

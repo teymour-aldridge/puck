@@ -51,7 +51,7 @@ impl<INPUT> Listener<INPUT> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListenerRef {
     listener_name: String,
     js_event: String,
