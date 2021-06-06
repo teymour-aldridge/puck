@@ -2,9 +2,9 @@ use std::{collections::HashMap, convert::TryFrom};
 
 use url::Url;
 
-use crate::Request;
+use crate::{body::Body, Request};
 
-use super::{Body, Method};
+use super::Method;
 
 #[derive(Debug)]
 pub struct RequestBuilder {

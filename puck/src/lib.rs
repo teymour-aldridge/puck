@@ -17,8 +17,8 @@ pub use request::Request;
 pub use response::Response;
 
 use encoder::Encoder;
-use request::{Body, HTML};
 
+pub mod body;
 pub mod encoder;
 pub mod request;
 pub mod response;

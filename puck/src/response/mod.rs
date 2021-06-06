@@ -3,7 +3,7 @@ use std::{
     io::{self, BufRead, BufReader, Read},
 };
 
-use crate::request::{Body, MAX_HEADERS, NEW_LINE};
+use crate::request::{MAX_HEADERS, NEW_LINE};
 
 use self::builder::ResponseBuilder;
 
