@@ -2,18 +2,11 @@ use std::io::Cursor;
 
 use crate::{body::Body, request::Method, Request};
 
-#[test]
-/// This regression test came from https://github.com/bailion/puck/runs/2756775397
-fn test_inverse_request() {
-    let headers = vec![
-        ("NW".to_string(), "gcfZ-spKEf-v-gh".to_string()),
-        ("Host".to_string(), "example.com".to_string()),
-    ];
-
+fn execute_test(headers: Vec<(String, String)>, body: impl ToString) {
     let mut req = Request::build("http://example.com")
         .headers(headers.clone())
         .method(Method::Get)
-        .body(Body::from_string("u𘐿\\K;ῗ𐰑𖭜R"))
+        .body(Body::from_string(body))
         .build();
 
     let mut vec = Vec::new();
@@ -25,8 +18,26 @@ fn test_inverse_request() {
         .expect("emtpy request");
 
     for header in req.headers {
-        dbg!(&header);
-        dbg!(&headers);
         assert!(headers.contains(&header))
     }
+}
+
+#[test]
+/// This regression test came from https://github.com/bailion/puck/runs/2756775397
+fn test_inverse_request_regression_2021_06_06_morning() {
+    let headers = vec![
+        ("NW".to_string(), "gcfZ-spKEf-v-gh".to_string()),
+        ("Host".to_string(), "example.com".to_string()),
+    ];
+    execute_test(headers, "u𘐿\\K;ῗ𐰑𖭜R");
+}
+
+#[test]
+/// This regression test came from https://github.com/bailion/puck/runs/2758615118
+fn test_inverse_request_regression_2021_06_06_afternoon() {
+    let headers = vec![
+        ("aA".to_string(), "aa".to_string()),
+        ("Host".to_string(), "example.com".to_string()),
+    ];
+    execute_test(headers, "");
 }
