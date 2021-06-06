@@ -10,7 +10,7 @@ extern crate derivative;
 #[cfg(test)]
 mod regressions;
 
-use body::{Body, mime::HTML};
+use body::{mime::HTML, Body};
 pub use puck_codegen::handler;
 
 pub use anyhow;
