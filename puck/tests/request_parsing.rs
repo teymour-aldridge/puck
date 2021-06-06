@@ -48,8 +48,8 @@ mod test {
         for ((input_key, input_value), (parsed_key, parsed_value)) in req
             .headers
             .into_iter()
-            .sorted()
-            .zip(headers.into_iter().sorted())
+            .sorted_by(|(a, _), (b, _)| a.cmp(b))
+            .zip(headers.into_iter().sorted_by(|(a, _), (b, _)| a.cmp(b)))
         {
             assert_eq!(input_key, parsed_key);
             assert_eq!(input_value, parsed_value);
