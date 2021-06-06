@@ -67,7 +67,7 @@ impl WrappedBodyNode {
                 Element {
                     id: id.clone(),
                     name: std::borrow::Cow::Borrowed("p"),
-                    attributes: hashmap! {},
+                    attributes: p.attrs,
                     listeners: self.listeners,
                     children: self
                         .children
@@ -75,7 +75,6 @@ impl WrappedBodyNode {
                         .enumerate()
                         .map(children_mapper)
                         .collect(),
-                    // todo: fix me once https://github.com/lovelace-edu/lovelace/pull/167 lands
                     text,
                     key: None,
                 }
