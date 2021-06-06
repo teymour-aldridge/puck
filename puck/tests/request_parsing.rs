@@ -46,7 +46,9 @@ mod test {
         let parsed_body_string = req.take_body().into_string().expect("failed to parse body");
         assert_eq!(parsed_body_string, body);
         for (a, b) in req.headers() {
-            assert!(headers.contains(&(a.clone(), b.clone())));
+            if a != "Content-Type" {
+                assert!(headers.contains(&(a.clone(), b.clone())));
+            }
         }
     }
 }
