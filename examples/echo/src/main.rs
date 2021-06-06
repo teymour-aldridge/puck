@@ -2,7 +2,7 @@
 
 use lunatic::net::TcpStream;
 use puck::{
-    request::Body,
+    body::Body,
     serve,
     ws::{message::Message, send::send, websocket::WebSocket},
     Request, Response,

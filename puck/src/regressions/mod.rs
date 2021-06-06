@@ -1,9 +1,6 @@
 use std::io::Cursor;
 
-use crate::{
-    request::{Body, Method},
-    Request,
-};
+use crate::{body::Body, request::Method, Request};
 
 #[test]
 /// This regression test came from https://github.com/bailion/puck/runs/2756775397

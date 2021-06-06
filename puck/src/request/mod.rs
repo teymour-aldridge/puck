@@ -1,12 +1,12 @@
 use std::{
-    borrow::Cow,
     collections::HashMap,
-    fmt::Display,
-    io::{self, BufRead, BufReader, Cursor, Read, Write},
+    io::{self, BufRead, BufReader, Read, Write},
     str::Utf8Error,
 };
 
 use url::Url;
+
+use crate::body::Body;
 
 pub mod builder;
 
@@ -130,6 +130,23 @@ impl Request {
     /// Get a reference to the request's body.
     pub fn body(&self) -> &Body {
         &self.body
+    }
+
+    /// Replace the current `Body` with the supplied `Body`, returning the existing `Body`.
+    pub fn replace_body(&mut self, body: impl Into<Body>) -> Body {
+        let body = std::mem::replace(&mut self.body, body.into());
+        self.copy_content_type_from_body();
+        body
+    }
+
+    /// Take the `Body` from this request, replacing the `Request`'s body with an empty `Body`.
+    pub fn take_body(&mut self) -> Body {
+        self.replace_body(Body::empty())
+    }
+
+    fn copy_content_type_from_body(&mut self) {
+        self.headers
+            .insert("Content-Type".into(), self.body.mime.to_string());
     }
 
     /// Get a reference to the request's url.

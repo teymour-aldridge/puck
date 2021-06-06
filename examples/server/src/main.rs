@@ -1,6 +1,9 @@
 use lunatic::channel::{Receiver, Sender};
 use puck::{
-    request::{Body, HTML, PLAIN},
+    body::{
+        mime::{HTML, PLAIN},
+        Body,
+    },
     Request, Response,
 };
 use serde::{Deserialize, Serialize};
@@ -14,7 +17,7 @@ fn home(_: Request) -> Response {
 }
 
 fn hello(req: Request) -> Response {
-    let name = req.url.path().split('/').last().unwrap();
+    let name = req.url().path().split('/').last().unwrap();
 
     Response::build()
         .header("Content-Type", HTML)
@@ -31,7 +34,7 @@ enum Msg {
 fn submit_info(req: Request, sender: Sender<Msg>) -> Response {
     sender
         .send(Msg::Send(
-            req.url.path().split('/').last().unwrap().to_string(),
+            req.url().path().split('/').last().unwrap().to_string(),
         ))
         .unwrap();
     Response::build()

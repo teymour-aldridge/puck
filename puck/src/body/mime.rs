@@ -1,3 +1,5 @@
+use std::{borrow::Cow, fmt::Display};
+
 /* This code comes from https://github.com/http-rs/http-types/blob/main/src/mime/parse.rs */
 
 #[derive(Debug, Clone)]

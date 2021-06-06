@@ -1,4 +1,4 @@
-use puck::{request::Body, Request, Response};
+use puck::{body::Body, Request, Response};
 
 /// Returns the index page to the client.
 ///

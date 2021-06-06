@@ -1,4 +1,6 @@
-use self::mime::Mime;
+use std::io::{BufRead, Cursor, Read};
+
+use self::mime::{Mime, BYTE_STREAM};
 
 pub mod mime;
 

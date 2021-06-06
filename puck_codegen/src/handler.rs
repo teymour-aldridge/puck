@@ -66,7 +66,7 @@ pub fn handler(args: TokenStream, input: TokenStream) -> TokenStream {
                         }
                     };
 
-            let path = request.url.path();
+            let path = request.url().path();
             let split = path.split('/').collect::<Vec<_>>();
             #routes
             else {
