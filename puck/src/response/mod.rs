@@ -3,7 +3,10 @@ use std::{
     io::{self, BufRead, BufReader, Read},
 };
 
-use crate::request::{Body, MAX_HEADERS, NEW_LINE};
+use crate::{
+    body::Body,
+    request::{MAX_HEADERS, NEW_LINE},
+};
 
 use self::builder::ResponseBuilder;
 
@@ -24,6 +27,7 @@ impl Response {
         self.headers
             .insert("Content-Type".into(), self.body.mime.to_string());
     }
+
     pub fn replace_body(&mut self, body: impl Into<Body>) -> Body {
         let body = std::mem::replace(&mut self.body, body.into());
         self.copy_content_type_from_body();

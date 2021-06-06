@@ -1,9 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{
-    request::{Body, Method},
-    Response,
-};
+use crate::{body::Body, request::Method, Response};
 
 #[derive(Derivative, Debug)]
 #[derivative(Default(new = "true"))]

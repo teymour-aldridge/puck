@@ -3,10 +3,7 @@ mod test {
     use std::collections::HashMap;
 
     use proptest::prelude::*;
-    use puck::{
-        request::{Body, Method},
-        Request,
-    };
+    use puck::{body::Body, request::Method, Request};
 
     fn ascii_headers() -> impl Strategy<Value = (Vec<(String, String)>, usize)> {
         // 19 because we add one!
@@ -43,13 +40,13 @@ mod test {
         req.write(&mut buffer)
             .expect("failed to write request into buffer");
         let cursor = std::io::Cursor::new(buffer);
-        let req = Request::parse(cursor)
+        let mut req = Request::parse(cursor)
             .expect("failed to parse")
             .expect("the request body was empty");
-        let parsed_body_string = req.body.into_string().expect("failed to parse body");
+        let parsed_body_string = req.take_body().into_string().expect("failed to parse body");
         assert_eq!(parsed_body_string, body);
-        for header in req.headers {
-            assert!(headers.contains(&header));
+        for (a, b) in req.headers() {
+            assert!(headers.contains(&(a.clone(), b.clone())));
         }
     }
 }
