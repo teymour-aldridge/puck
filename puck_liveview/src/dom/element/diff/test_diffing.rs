@@ -45,7 +45,7 @@ fn test_single_element_attribute_change() {
 
     let cs = old.diff(Some(&new));
 
-    assert_eq!(cs.ops.len(), 2);
+    assert_eq!(cs.ops.len(), 3);
     assert!(cs.ops.iter().any(|op| {
         match &op.instruction {
             crate::dom::element::diff::changeset::Instruction::SetAttribute { key, value } => {
