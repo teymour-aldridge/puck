@@ -1,4 +1,4 @@
-//! A HTTP library for the Lunatic Virtual Machine.
+//! An HTTP library for the Lunatic Virtual Machine.
 
 #![deny(missing_debug_implementations, unused_must_use)]
 
