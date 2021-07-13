@@ -1,3 +1,5 @@
+//! HTTP MIME types.
+
 use std::{borrow::Cow, fmt::Display};
 
 /* This code comes from https://github.com/http-rs/http-types/blob/main/src/mime/parse.rs */
@@ -64,7 +66,7 @@ pub const BYTE_STREAM: Mime = Mime {
 };
 
 /// Implementation of the
-//// [WHATWG MIME serialization algorithm](https://mimesniff.spec.whatwg.org/#serializing-a-mime-type)
+/// [WHATWG MIME serialization algorithm](https://mimesniff.spec.whatwg.org/#serializing-a-mime-type)
 pub(crate) fn format(mime_type: &Mime, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     write!(f, "{}", &mime_type.essence)?;
     if mime_type.is_utf8 {

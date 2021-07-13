@@ -1,8 +1,11 @@
+//! A `Response` builder.
+
 use std::collections::HashMap;
 use std::fmt::Debug;
 
 use crate::{body::Body, request::Method, Response};
 
+/// Builds `Response`s.
 pub struct ResponseBuilder {
     headers: HashMap<String, String>,
     body: Option<Body>,

@@ -1,8 +1,12 @@
+//! HTTP bodies.
+
 use std::fmt;
 use std::io::{BufRead, Cursor, Read};
 
 use self::mime::{Mime, BYTE_STREAM};
 
+// for now, todo: add documentation
+#[allow(missing_docs)]
 pub mod mime;
 
 #[cfg_attr(feature = "fuzzing", derive(DefaultMutator, ToJson, FromJson))]
@@ -26,6 +30,7 @@ impl fmt::Debug for Body {
 }
 
 impl Body {
+    /// Create an empty `Body`.
     pub fn empty() -> Self {
         Self {
             reader: Box::new(Cursor::new(b"")),
@@ -61,14 +66,16 @@ impl Body {
         }
     }
 
-    /// Reads from the underlying IO source, and returns the result as bytes (`Vec<u8>`).
+    /// Reads to completion from the underlying IO source, and returns the result as bytes
+    /// (`Vec<u8>`).
     pub fn into_bytes(mut self) -> std::io::Result<Vec<u8>> {
         let mut buf = Vec::with_capacity(1024);
         self.read_to_end(&mut buf)?;
         Ok(buf)
     }
 
-    /// Reads from the underlying IO source, and returns the result as a `String`.
+    /// Reads to completion from the underlying IO source, and returns the result as a
+    /// `String`.
     pub fn into_string(mut self) -> std::io::Result<String> {
         let mut result = String::with_capacity(self.length.unwrap_or(0));
         self.read_to_string(&mut result)?;

@@ -7,6 +7,7 @@ use byteorder::{NetworkEndian, ReadBytesExt, WriteBytesExt};
 use super::message::Message;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+/// A WebSocket frame.
 pub struct Frame {
     pub(crate) fin: bool,
     pub(crate) rsv1: bool,
@@ -17,6 +18,7 @@ pub struct Frame {
 }
 
 impl Frame {
+    /// Parse a frame from the given stream.
     pub fn parse(stream: impl Read) -> Result<Self, ParseFrameError> {
         let mut bufread = BufReader::new(stream);
 
@@ -109,6 +111,7 @@ impl Frame {
         &self.decoded
     }
 
+    /// Returns the decoded data from this frame.
     pub fn take_decoded(self) -> Vec<u8> {
         self.decoded
     }
@@ -149,6 +152,8 @@ impl Frame {
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
+/// The operation code (from the specification) of this frame.
+#[allow(missing_docs)]
 pub enum OpCode {
     Continue,
     Binary,
@@ -174,6 +179,8 @@ impl OpCode {
 }
 
 #[derive(thiserror::Error, Debug)]
+/// An error encountered when trying to parse a `Frame`.
+#[allow(missing_docs)]
 pub enum ParseFrameError {
     #[error("mask not set")]
     MaskNotSet,

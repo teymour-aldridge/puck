@@ -1,3 +1,5 @@
+//! A `Request` builder.
+
 use std::{collections::HashMap, convert::TryFrom};
 
 use url::Url;
@@ -7,6 +9,7 @@ use crate::{body::Body, Request};
 use super::Method;
 
 #[derive(Debug)]
+/// A struct used to build HTTP requests.
 pub struct RequestBuilder {
     pub(crate) headers: HashMap<String, String>,
     pub(crate) method: Option<Method>,
@@ -78,7 +81,9 @@ impl RequestBuilder {
 }
 
 #[derive(thiserror::Error, Debug, Clone)]
+/// An error encountered when attempting to construct a `Request`.
 pub enum TryBuildError {
     #[error("method not provided")]
+    /// The request method was not provided.
     MethodNotProvided,
 }

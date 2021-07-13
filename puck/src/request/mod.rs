@@ -1,3 +1,5 @@
+//! HTTP requests.
+
 use std::{
     collections::HashMap,
     io::{self, BufRead, BufReader, Read, Write},
@@ -10,7 +12,10 @@ use crate::body::Body;
 
 pub mod builder;
 
+/// The maximum number of headers which Puck will parse.
 pub const MAX_HEADERS: usize = 20;
+
+/// The new line delimiter.
 pub const NEW_LINE: u8 = b'\n';
 
 /// A HTTP request.
@@ -164,16 +169,22 @@ impl Request {
 #[derive(thiserror::Error, Debug)]
 /// An error encountered when trying to parse a request.
 pub enum RequestParseError {
+    /// Couldn't parse the request in question.
     #[error("could not parse")]
     CouldNotParse(httparse::Error),
+    /// A `Utf8Error` was encountered when parsing the request.
     #[error("utf8 error")]
     Utf8Error(Utf8Error),
+    /// An `IoError` was encountered when parsing the request.
     #[error("io error")]
     IoError(io::Error),
+    /// The URL supplied was not valid.
     #[error("the supplied url was invalid")]
     InvalidUrl,
+    /// A header is missing.
     #[error("the `{0}` header is missing")]
     MissingHeader(String),
+    /// The request method is missing.
     #[error("missing method")]
     MissingMethod,
 }
@@ -198,6 +209,7 @@ impl From<Utf8Error> for RequestParseError {
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 /// The HTTP method (e.g. "GET" or "POST")
+#[allow(missing_docs)]
 pub enum Method {
     Get,
     Post,
@@ -206,6 +218,7 @@ pub enum Method {
 }
 
 impl Method {
+    /// Create a new method from the provided string.
     pub fn new_from_str(str: &str) -> Self {
         match str.to_ascii_lowercase().as_str() {
             "get" => Self::Get,
@@ -214,6 +227,7 @@ impl Method {
         }
     }
 
+    /// Write the given message to a TCP stream.
     pub fn write(&self, write: &mut impl Write) -> io::Result<()> {
         let to_write = match self {
             Method::Get => "GET",
