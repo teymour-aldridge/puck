@@ -1,4 +1,3 @@
 status = [
     "bors-report"
 ]
-use_squash_merge = true
