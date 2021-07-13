@@ -1,13 +1,18 @@
 #[cfg(feature = "_test_fuzzing")]
 mod test_diffing {
-    use proptest::proptest;
+
+    use proptest::{arbitrary::Arbitrary, proptest, strategy::Strategy};
     use puck_liveview::prelude::{BodyNode, IntoWrappedBodyNode};
 
     proptest! {
         #[test]
-        fn pt_test_diffing(before: BodyNode, after: BodyNode) {
+        fn pt_test_diffing(before in generate_body_node(), after in generate_body_node()) {
             test_diffing_inner(before, after);
         }
+    }
+
+    fn generate_body_node() -> impl Strategy<Value = BodyNode> {
+        BodyNode::arbitrary_with((8, 256, 10))
     }
 
     fn test_diffing_inner(before: BodyNode, after: BodyNode) {
