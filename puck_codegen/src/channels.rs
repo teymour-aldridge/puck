@@ -94,7 +94,7 @@ impl Channels {
                 if split.len() == #len {
                     if ** #collected {
                         let response = #function(request #extra_args);
-                        let mut encoder = ::puck::encoder::Encoder::new(response);
+                        let mut encoder = ::puck::response::encoder::Encoder::new(response);
                         encoder.write_tcp_stream(stream).unwrap();
                         #[allow(all)]
                         return;

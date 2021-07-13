@@ -60,7 +60,7 @@ pub fn handler(args: TokenStream, input: TokenStream) -> TokenStream {
                         Some(t) => t,
                         None => {
                             let response = ::puck::err_400();
-                            let mut encoder = ::puck::encoder::Encoder::new(response);
+                            let mut encoder = ::puck::response::encoder::Encoder::new(response);
                             encoder.write_tcp_stream(stream).unwrap();
                             return;
                         }
@@ -71,7 +71,7 @@ pub fn handler(args: TokenStream, input: TokenStream) -> TokenStream {
             #routes
             else {
                 let response = ::puck::err_404(request);
-                let mut encoder = ::puck::encoder::Encoder::new(response);
+                let mut encoder = ::puck::response::encoder::Encoder::new(response);
                 encoder.write_tcp_stream(stream).unwrap();
             }
         }
