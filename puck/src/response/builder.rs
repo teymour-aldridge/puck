@@ -1,9 +1,8 @@
 use std::collections::HashMap;
+use std::fmt::Debug;
 
 use crate::{body::Body, request::Method, Response};
 
-#[derive(Derivative, Debug)]
-#[derivative(Default(new = "true"))]
 pub struct ResponseBuilder {
     headers: HashMap<String, String>,
     body: Option<Body>,
@@ -12,7 +11,35 @@ pub struct ResponseBuilder {
     method: Option<Method>,
 }
 
+impl Debug for ResponseBuilder {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ResponseBuilder")
+            .field("headers", &self.headers)
+            .field("status", &self.status)
+            .field("reason", &self.reason)
+            .field("method", &self.method)
+            .finish_non_exhaustive()
+    }
+}
+
+impl Default for ResponseBuilder {
+    fn default() -> Self {
+        Self {
+            headers: HashMap::new(),
+            body: None,
+            status: None,
+            reason: None,
+            method: None,
+        }
+    }
+}
+
 impl ResponseBuilder {
+    /// Create a new `ResponseBuilder`. Equivalent to the `Default` implementation.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     /// Set a header for this HTTP response.
     pub fn header(mut self, key: impl ToString, value: impl ToString) -> Self {
         self.headers.insert(key.to_string(), value.to_string());

@@ -1,20 +1,28 @@
+use std::fmt;
 use std::io::{BufRead, Cursor, Read};
 
 use self::mime::{Mime, BYTE_STREAM};
 
 pub mod mime;
 
-#[derive(Derivative)]
-#[derivative(Debug)]
 #[cfg_attr(feature = "fuzzing", derive(DefaultMutator, ToJson, FromJson))]
 /// An HTTP `Body`. This struct contains an IO source, from which the `Body`'s contents can be read,
 /// as well as the MIME type of the contents of the `Body`.
 pub struct Body {
-    #[derivative(Debug = "ignore")]
     reader: Box<dyn BufRead + 'static>,
     pub(crate) mime: Mime,
     pub(crate) length: Option<usize>,
     bytes_read: usize,
+}
+
+impl fmt::Debug for Body {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Body")
+            .field("mime", &self.mime)
+            .field("length", &self.length)
+            .field("bytes_read", &self.bytes_read)
+            .finish_non_exhaustive()
+    }
 }
 
 impl Body {
