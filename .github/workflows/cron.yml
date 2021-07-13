@@ -1,9 +1,7 @@
-name: Catches bugs at the midnight hour
+name: (Used to) catch bugs at the midnight hour
 
 on:
   pull_request:
-  schedule:
-    - cron: "0 0 * * *" # every day at midnight (spooky :D)
 
 jobs:
   puck_property_testing:
