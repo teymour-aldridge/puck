@@ -1,15 +1,24 @@
-use std::io::{Read, Write};
+use std::{
+    fmt,
+    io::{Read, Write},
+};
 
 use log::trace;
 
 use super::{frame::Frame, message::Message, send::send_frame};
 
-#[derive(Derivative, Clone)]
-#[derivative(Debug)]
+#[derive(Clone)]
 pub struct WebSocket<S: Read + Write + Clone> {
-    #[derivative(Debug = "ignore")]
     stream: S,
     state: WebSocketState,
+}
+
+impl<S: Read + Write + Clone> fmt::Debug for WebSocket<S> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("WebSocket")
+            .field("state", &self.state)
+            .finish_non_exhaustive()
+    }
 }
 
 #[derive(Debug, Copy, Clone)]

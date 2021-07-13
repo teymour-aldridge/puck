@@ -4,9 +4,6 @@
 
 use std::{collections::HashMap, io::Write, net::ToSocketAddrs};
 
-#[macro_use]
-extern crate derivative;
-
 #[cfg(test)]
 mod regressions;
 
@@ -17,10 +14,9 @@ pub use anyhow;
 pub use request::Request;
 pub use response::Response;
 
-use encoder::Encoder;
+use response::encoder::Encoder;
 
 pub mod body;
-pub mod encoder;
 pub mod request;
 pub mod response;
 pub mod ws;
@@ -35,6 +31,7 @@ pub fn serve<H: Handler, ADDRESS: ToSocketAddrs>(address: ADDRESS) -> anyhow::Re
     H::handle(address)
 }
 
+/// Return an error 404 not found response.
 pub fn err_404(_: Request) -> Response {
     Response {
         headers: {
@@ -48,6 +45,7 @@ pub fn err_404(_: Request) -> Response {
     }
 }
 
+/// Return a `400` error response.
 pub fn err_400() -> Response {
     Response {
         headers: {
@@ -61,6 +59,7 @@ pub fn err_400() -> Response {
     }
 }
 
+/// Write the given response to a writable TCP stream.
 pub fn write_response(res: Response, stream: impl Write) {
     let mut encoder = Encoder::new(res);
     encoder.write_tcp_stream(stream).unwrap();

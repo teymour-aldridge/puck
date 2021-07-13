@@ -11,6 +11,7 @@ use crate::{
 use self::builder::ResponseBuilder;
 
 pub mod builder;
+pub mod encoder;
 
 /// A HTTP response.
 #[derive(Debug)]

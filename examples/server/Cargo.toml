@@ -9,4 +9,4 @@ edition = "2018"
 [dependencies]
 lunatic = "0.3.10"
 puck = { path = "../../puck" }
-serde = { version = "1.0.123", features = ["derive"] }
+serde = { version = "1.0.126", features = ["derive"] }
