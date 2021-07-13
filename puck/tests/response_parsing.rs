@@ -3,7 +3,7 @@ mod test {
     use std::{collections::HashMap, io::Cursor};
 
     use proptest::prelude::*;
-    use puck::{body::Body, encoder::Encoder, Response};
+    use puck::{body::Body, response::encoder::Encoder, Response};
 
     fn ascii_headers() -> impl Strategy<Value = (Vec<(String, String)>, usize)> {
         // 19 because we add one!
