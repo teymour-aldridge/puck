@@ -6,6 +6,7 @@ use sha1::{Digest, Sha1};
 
 use crate::{err_400, write_response, Response};
 
+/// Compute whether or not this request can be upgraded.
 pub fn should_upgrade(req: &crate::Request) -> bool {
     req.headers
         .get("Upgrade")

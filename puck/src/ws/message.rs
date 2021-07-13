@@ -8,14 +8,20 @@ use crate::ws::frame::Frame;
 use super::frame::{OpCode, ParseFrameError};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+/// A WebSocket message.
 pub enum Message {
+    /// A ping.
     Ping(Option<Vec<u8>>),
+    /// A pong.
     Pong(Option<Vec<u8>>),
+    /// A text message.
     Text(String),
+    /// A binary message.
     Binary(Vec<u8>),
 }
 
 impl Message {
+    /// Parse the next message from the stream.
     pub fn next(stream: impl Read + Clone) -> Result<Self, DecodeMessageError> {
         log::trace!("trying to parse next message");
         let first = Frame::parse(stream.clone())?;
@@ -98,6 +104,8 @@ impl Message {
 }
 
 #[derive(thiserror::Error, Debug)]
+/// An error encountered when trying to decode a WebSocket message.
+#[allow(missing_docs)]
 pub enum DecodeMessageError {
     #[error("the client violated the WebSocket protocol")]
     ClientProtocolViolationError,

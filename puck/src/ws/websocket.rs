@@ -8,6 +8,7 @@ use log::trace;
 use super::{frame::Frame, message::Message, send::send_frame};
 
 #[derive(Clone)]
+/// A WebSocket connection over a duplex stream.
 pub struct WebSocket<S: Read + Write + Clone> {
     stream: S,
     state: WebSocketState,
@@ -22,8 +23,11 @@ impl<S: Read + Write + Clone> fmt::Debug for WebSocket<S> {
 }
 
 #[derive(Debug, Copy, Clone)]
+/// The state of the WebSocket connection (either open or closed).
 pub enum WebSocketState {
+    /// The connection is open.
     Open,
+    /// The connection has been closed.
     Closed,
 }
 
@@ -31,6 +35,7 @@ impl<S> WebSocket<S>
 where
     S: Read + Write + Clone,
 {
+    /// Create a new WebSocket connection listening on the provided stream.
     pub fn new(stream: S) -> Self {
         Self {
             stream,
@@ -93,10 +98,13 @@ where
 }
 
 #[derive(thiserror::Error, Debug)]
+/// An error encountered when trying to lift the next message from the stream.
 pub enum NextMessageError {
     #[error("malformed client")]
+    /// The client sent an invalid request.
     ClientError,
     #[error("the connection has been closed")]
+    /// The connection is already closed.
     ConnectionClosed,
 }
 

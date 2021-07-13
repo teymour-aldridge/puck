@@ -1,16 +1,22 @@
+//! Encodes HTTP responses.
+
 use std::io::Write;
 
 use crate::Response;
 
 #[derive(Debug)]
+/// Encodes HTTP responses.
 pub struct Encoder {
     response: Response,
 }
 
 impl Encoder {
+    /// Construct a new response encoder.
     pub fn new(response: Response) -> Self {
         Self { response }
     }
+
+    /// Write the current response to the given stream.
     pub fn write_tcp_stream(&mut self, mut stream: impl Write) -> std::io::Result<()> {
         write!(
             stream,

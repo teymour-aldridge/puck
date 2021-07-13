@@ -1,3 +1,5 @@
+//! HTTP responses.
+
 use std::{
     collections::HashMap,
     io::{self, BufRead, BufReader, Read},
@@ -29,6 +31,7 @@ impl Response {
             .insert("Content-Type".into(), self.body.mime.to_string());
     }
 
+    /// Replaces the current body with an empty one and returns the current body.
     pub fn replace_body(&mut self, body: impl Into<Body>) -> Body {
         let body = std::mem::replace(&mut self.body, body.into());
         self.copy_content_type_from_body();
@@ -135,6 +138,7 @@ impl Response {
 
 #[derive(thiserror::Error, Debug)]
 /// An error encountered when parsing a `Response`.
+#[allow(missing_docs)]
 pub enum ParseResponseError {
     #[error("io error")]
     IoError(io::Error),

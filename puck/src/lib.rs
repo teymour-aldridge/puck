@@ -1,6 +1,6 @@
 //! An HTTP library for the Lunatic Virtual Machine.
 
-#![deny(missing_debug_implementations, unused_must_use)]
+#![deny(missing_debug_implementations, unused_must_use, missing_docs)]
 
 use std::{collections::HashMap, io::Write, net::ToSocketAddrs};
 
@@ -21,12 +21,15 @@ pub mod request;
 pub mod response;
 pub mod ws;
 
+/// Used to handle requests.
 pub trait Handler {
+    /// Bind to given address and handle results, returning a result as needed.
     fn handle<ADDRESS>(address: ADDRESS) -> anyhow::Result<()>
     where
         ADDRESS: ToSocketAddrs;
 }
 
+/// Serve the given handler using the provided address.
 pub fn serve<H: Handler, ADDRESS: ToSocketAddrs>(address: ADDRESS) -> anyhow::Result<()> {
     H::handle(address)
 }
