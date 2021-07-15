@@ -5,7 +5,7 @@ use std::io::Write;
 use super::{frame::Frame, message::Message};
 
 /// Send a message to the provided stream.
-pub fn send(stream: impl Write, msg: Message) -> Result<(), SendFrameError> {
+pub(crate) fn send(stream: impl Write, msg: Message) -> Result<(), SendFrameError> {
     send_frame(stream, Frame::from(msg))
 }
 

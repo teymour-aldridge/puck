@@ -55,15 +55,6 @@ impl WrappedBodyNode {
             }
             BodyNode::P(p) => {
                 let p = p.into_pub_fields();
-                let mut children = vec![];
-                let mut text = None;
-                for each in p.children {
-                    if let BodyNode::Text(t) = each {
-                        text = Some(t.into_pub_fields().text);
-                    } else {
-                        children.push(each);
-                    }
-                }
                 Element {
                     id: id.clone(),
                     name: std::borrow::Cow::Borrowed("p"),
@@ -75,7 +66,7 @@ impl WrappedBodyNode {
                         .enumerate()
                         .map(children_mapper)
                         .collect(),
-                    text,
+                    text: Some(p.text),
                     key: None,
                 }
             }

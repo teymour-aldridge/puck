@@ -35,9 +35,13 @@ use chrono::{NaiveDateTime, Utc};
 use lunatic::{
     channel::{bounded, unbounded, Receiver, Sender},
     net::TcpStream,
+    Process,
 };
 use maplit::hashmap;
-use puck::{serve, Request};
+use puck::{
+    app::{Handler, Route},
+    at, run_app,
+};
 use puck_liveview::{
     dom::{
         element::{
@@ -52,22 +56,40 @@ use puck_liveview::{
 };
 use serde::{Deserialize, Serialize};
 
-fn main() {
-    serve::<App, &str>("127.0.0.1:5052").expect("server error");
+#[derive(Clone, Serialize, Deserialize)]
+pub struct State {
+    chat: (Sender<SubscribeMsg>, Receiver<SubscribeMsg>),
 }
 
-#[puck::handler(
-    handle(at = "/ws", call = "liveview", web_socket = true, send = "chat"),
-    handle(at = "/", call = "index"),
-    handle(at = "/js", call = "js"),
-    channel(
-        name = "chat",
-        message_type = "SubscribeMsg",
-        supervisor = "chat_server"
-    )
-)]
-struct App;
+fn main() {
+    let state = State { chat: unbounded() };
 
+    Process::spawn_with(state.chat.clone(), chat_server).detach();
+
+    run_app!(
+        puck::app::App::new()
+            .route(Route::new(
+                at!("ws"),
+                Handler::Ws(|ws, state: State| {
+                    let stream = ws.clone_stream();
+
+                    liveview(stream, state.chat.0);
+
+                    drop(ws);
+                }),
+            ))
+            .route(Route::new(
+                at!(""),
+                Handler::Http(|request, _| index(request)),
+            ))
+            .route(Route::new(
+                at!("js"),
+                Handler::Http(|request, _| js(request)),
+            )),
+        "127.0.0.1:5052",
+        state
+    );
+}
 #[derive(Debug, Clone)]
 struct UserChatData {
     messages: Vec<Msg>,
@@ -96,7 +118,7 @@ pub enum InputMsg {
     SendMsg,
 }
 
-fn liveview(_: Request, stream: TcpStream, sender: Sender<SubscribeMsg>) {
+fn liveview(stream: TcpStream, sender: Sender<SubscribeMsg>) {
     let (send_username, receive_username) = bounded(1);
     sender.send(SubscribeMsg::Joined(send_username)).unwrap();
     let id = receive_username.receive().unwrap();
@@ -137,7 +159,10 @@ impl Component<(UserChatData, Sender<SubscribeMsg>), InputMsg> for Root {
 
     fn update(&mut self, input: InputMsg) {
         match input {
-            InputMsg::NewMsg(msg) => self.data.messages.push(msg),
+            InputMsg::NewMsg(msg) => {
+                dbg!(&msg);
+                self.data.messages.push(msg)
+            }
             InputMsg::TextInput(contents) => {
                 self.data.text_field_contents = contents;
             }

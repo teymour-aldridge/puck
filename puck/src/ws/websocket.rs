@@ -5,7 +5,11 @@ use std::{
 
 use log::trace;
 
-use super::{frame::Frame, message::Message, send::send_frame};
+use super::{
+    frame::Frame,
+    message::Message,
+    send::{self, send_frame, SendFrameError},
+};
 
 #[derive(Clone)]
 /// A WebSocket connection over a duplex stream.
@@ -41,6 +45,21 @@ where
             stream,
             state: WebSocketState::Open,
         }
+    }
+
+    /// Send a message to the other party.
+    pub fn send(&self, message: Message) -> Result<(), SendFrameError> {
+        send::send(self.clone_stream(), message)
+    }
+
+    /// Send a message to a stream.
+    pub fn send_to_stream(stream: S, message: Message) -> Result<(), SendFrameError> {
+        send::send(stream, message)
+    }
+
+    /// Return the underlying stream.
+    pub fn clone_stream(&self) -> S {
+        self.stream.clone()
     }
 }
 

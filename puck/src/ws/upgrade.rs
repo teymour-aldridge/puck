@@ -10,12 +10,12 @@ use crate::{err_400, write_response, Response};
 pub fn should_upgrade(req: &crate::Request) -> bool {
     req.headers
         .get("Upgrade")
-        .map(|val| val == "WebSocket")
+        .map(|val| val.to_ascii_lowercase() == "websocket")
         .unwrap_or_default()
         && req
             .headers
             .get("Connection")
-            .map(|val| val == "Upgrade")
+            .map(|val| val.to_ascii_lowercase() == "upgrade")
             .unwrap_or_default()
 }
 
