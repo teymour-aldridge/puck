@@ -2,20 +2,20 @@
 
 use lunatic::net::TcpStream;
 use puck::{
+    app::{Handler, Route},
+    at,
     body::Body,
-    serve,
-    ws::{message::Message, send::send, websocket::WebSocket},
+    run_app,
+    ws::{message::Message, websocket::WebSocket},
     Request, Response,
 };
 
-pub fn echo(_: Request, stream: TcpStream) {
-    let mut ws = WebSocket::new(stream.clone());
-
+pub fn echo(mut ws: WebSocket<TcpStream>) {
     // note that this will *never* return `None`
     while let Ok(next) = ws.next().unwrap() {
         match next {
             Message::Text(_) | Message::Binary(_) => {
-                send(stream.clone(), next).unwrap();
+                let _ = ws.send(next);
             }
             // the `WebSocket` struct handles returning pings and pongs, so you don't have to
             _ => {}
@@ -32,12 +32,18 @@ pub fn home(_: Request) -> Response {
         .build()
 }
 
-#[puck::handler(
-    handle(at = "/", call = "home"),
-    handle(at = "/ws", call = "echo", web_socket = true)
-)]
-pub struct App;
-
 fn main() {
-    serve::<App, &str>("127.0.0.1:5051").expect("error running server");
+    run_app!(
+        puck::app::App::new()
+            .route(Route::new(
+                at!(""),
+                Handler::Http(|request, _| home(request)),
+            ))
+            .route(Route::new(
+                at!("ws"),
+                Handler::Ws(|websocket, _| echo(websocket)),
+            )),
+        "127.0.0.1:5051",
+        ()
+    )
 }

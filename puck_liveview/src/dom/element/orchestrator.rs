@@ -6,7 +6,7 @@ use lunatic::{
     Process,
 };
 
-use puck::ws::{message::Message, send::send};
+use puck::ws::{message::Message, websocket::WebSocket};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -62,7 +62,7 @@ pub fn manage<C: Component<DATA, INPUT>, DATA: 'static, INPUT>(
 
     let payload = serde_json::to_string(&JsFriendlyInstructionSerializer(instructions)).unwrap();
 
-    send(stream.clone(), Message::Text(payload)).unwrap();
+    WebSocket::send_to_stream(stream.clone(), Message::Text(payload)).unwrap();
 
     while let Ok(input) = give_me_messages.receive() {
         match input {
@@ -104,7 +104,7 @@ pub fn manage<C: Component<DATA, INPUT>, DATA: 'static, INPUT>(
 
                 let instructions = old_dom.diff(Some(&new_dom));
 
-                send(
+                WebSocket::send_to_stream(
                     stream.clone(),
                     Message::Text(
                         serde_json::to_string(&JsFriendlyInstructionSerializer(instructions))
