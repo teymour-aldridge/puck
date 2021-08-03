@@ -223,7 +223,7 @@ impl Element {
         if self.children_are_all_keyed() && other.children_are_all_keyed() {
             let mut unpaired = vec![];
             for (i, their_child) in other.children.iter().enumerate() {
-                if let Some(my_child) = self.locate_child_by_key(&their_child.key.as_ref().unwrap())
+                if let Some(my_child) = self.locate_child_by_key(their_child.key.as_ref().unwrap())
                 {
                     changeset.ops.extend(my_child.diff(Some(their_child)));
                 } else {
@@ -265,7 +265,7 @@ impl Element {
                 };
 
                 for el in create_elements_from[start_index..].iter() {
-                    changeset.ops.extend(el.create_from_scratch(Some(&other)));
+                    changeset.ops.extend(el.create_from_scratch(Some(other)));
                 }
             }
         }
