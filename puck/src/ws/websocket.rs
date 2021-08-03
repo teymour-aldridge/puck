@@ -1,9 +1,9 @@
-use std::{
-    fmt,
-    io::{Read, Write},
-};
+use std::io::Write;
 
 use log::trace;
+use lunatic::net::TcpStream;
+
+use crate::app::UsedStream;
 
 use super::{
     frame::Frame,
@@ -11,22 +11,14 @@ use super::{
     send::{self, send_frame, SendFrameError},
 };
 
-#[derive(Clone)]
+#[derive(Debug)]
 /// A WebSocket connection over a duplex stream.
-pub struct WebSocket<S: Read + Write + Clone> {
-    stream: S,
+pub struct WebSocket {
+    stream: TcpStream,
     state: WebSocketState,
 }
 
-impl<S: Read + Write + Clone> fmt::Debug for WebSocket<S> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("WebSocket")
-            .field("state", &self.state)
-            .finish_non_exhaustive()
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 /// The state of the WebSocket connection (either open or closed).
 pub enum WebSocketState {
     /// The connection is open.
@@ -35,12 +27,9 @@ pub enum WebSocketState {
     Closed,
 }
 
-impl<S> WebSocket<S>
-where
-    S: Read + Write + Clone,
-{
+impl WebSocket {
     /// Create a new WebSocket connection listening on the provided stream.
-    pub fn new(stream: S) -> Self {
+    pub fn new(stream: TcpStream) -> Self {
         Self {
             stream,
             state: WebSocketState::Open,
@@ -53,17 +42,32 @@ where
     }
 
     /// Send a message to a stream.
-    pub fn send_to_stream(stream: S, message: Message) -> Result<(), SendFrameError> {
+    pub fn send_to_stream(stream: TcpStream, message: Message) -> Result<(), SendFrameError> {
         send::send(stream, message)
     }
 
     /// Return the underlying stream.
-    pub fn clone_stream(&self) -> S {
+    fn clone_stream(&self) -> TcpStream {
         self.stream.clone()
+    }
+
+    /// Close the WebSocket connection.
+    pub fn close(self) -> Result<UsedStream, SendFrameError> {
+        match self.state {
+            WebSocketState::Open => {
+                send_close_frame(self.stream.clone());
+            }
+            WebSocketState::Closed => {}
+        };
+
+        Ok(UsedStream {
+            stream: self.stream,
+            keep_alive: false,
+        })
     }
 }
 
-impl<S: Read + Write + Clone> Iterator for WebSocket<S> {
+impl Iterator for WebSocket {
     type Item = Result<Message, NextMessageError>;
 
     fn next(&mut self) -> Option<Result<Message, NextMessageError>> {
@@ -99,20 +103,6 @@ impl<S: Read + Write + Clone> Iterator for WebSocket<S> {
             },
             WebSocketState::Closed => Err(NextMessageError::ConnectionClosed),
         })
-    }
-}
-
-impl<S> Drop for WebSocket<S>
-where
-    S: Read + Write + Clone,
-{
-    fn drop(&mut self) {
-        match self.state {
-            WebSocketState::Open => {
-                send_close_frame(self.stream.clone());
-            }
-            WebSocketState::Closed => {}
-        }
     }
 }
 
