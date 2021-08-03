@@ -57,10 +57,12 @@ macro_rules! at {
 
 impl<STATE> Route<STATE> {
     /// Create a new route.
+    #[inline(always)]
     pub fn new(matcher: fn(&Url) -> bool, handler: Handler<STATE>) -> Self {
         Self { handler, matcher }
     }
 
+    #[inline(always)]
     fn matches(&self, url: &Url) -> bool {
         (self.matcher)(url)
     }
@@ -82,6 +84,7 @@ pub struct App<STATE> {
 }
 
 impl<STATE> Default for App<STATE> {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             routes: Default::default(),
@@ -92,23 +95,27 @@ impl<STATE> Default for App<STATE> {
 
 impl<STATE> App<STATE> {
     /// Create a new route.
+    #[inline(always)]
     pub fn new() -> Self {
         Default::default()
     }
 
     /// Attach the required state to this application.
+    #[inline(always)]
     pub fn state(mut self, state: STATE) -> Self {
         self.state = Some(state);
         self
     }
 
     /// Attach a new route to this application.
+    #[inline(always)]
     pub fn route(mut self, route: Route<STATE>) -> Self {
         self.routes.push(route);
         self
     }
 
     /// Process a single request.
+    #[inline(always)]
     pub fn process_request(self, stream: TcpStream) {
         let request = if let Ok(Some(request)) = Request::parse(stream.clone()) {
             request
