@@ -3,7 +3,4 @@ resolver = "2"
 members = [
     "puck",
     "puck_liveview",
-    "examples/chat",
-    "examples/echo",
-    "examples/server",
 ]

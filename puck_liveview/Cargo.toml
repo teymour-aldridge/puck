@@ -7,10 +7,10 @@ edition = "2018"
 [dependencies]
 derive_builder = "0.10.2"
 puck = { path = "../puck" }
-serde = { version = "1.0.126", features = ["derive"] }
-serde_json = "1.0.64"
+serde = { version = "1.0.127", features = ["derive"] }
+serde_json = "1.0.66"
 maplit = "1.0.2"
-lunatic = "0.3.10"
+lunatic = "0.5.2"
 proptest = { version = "1.0.0", optional = true }
 
 [target.'cfg(not(target_arch="wasm32"))'.dependencies.malvolio]

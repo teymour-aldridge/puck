@@ -6,7 +6,6 @@ use std::{borrow::Cow, collections::HashMap};
 use super::listener::ListenerRef;
 
 pub mod diff;
-pub mod orchestrator;
 pub mod render;
 
 /// An HTML element.
