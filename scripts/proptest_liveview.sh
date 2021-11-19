@@ -2,7 +2,7 @@
 
 $exit_code=0
 
-end=$((SECONDS+7200))
+end=$((SECONDS+300))
 
 while [ $SECONDS -lt $end ]; do
     (cd puck_liveview && cargo test pt_ --release --features _test_fuzzing "$@")
