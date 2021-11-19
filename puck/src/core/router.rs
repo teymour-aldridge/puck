@@ -48,7 +48,7 @@ impl<STATE: Serialize + DeserializeOwned + Clone> Router<STATE> {
         }
     }
 
-    fn into_ints(&self) -> Vec<(usize, usize)> {
+    fn as_ints(&self) -> Vec<(usize, usize)> {
         self.routes
             .iter()
             .map(|route| {
@@ -60,7 +60,7 @@ impl<STATE: Serialize + DeserializeOwned + Clone> Router<STATE> {
             .collect()
     }
 
-    /// Reconstructs the router from `Router::into_ints`. Panics if the data is not in a valid form.
+    /// Reconstructs the router from `Router::as_ints`. Panics if the data is not in a valid form.
     fn from_ints(ints: Vec<(usize, usize)>) -> Self {
         let routes = ints
             .iter()
@@ -94,7 +94,7 @@ impl<STATE: Serialize + DeserializeOwned + Clone> Router<STATE> {
             };
 
             let _ = process::spawn_with(
-                (self.into_ints(), stream, state.clone()),
+                (self.as_ints(), stream, state.clone()),
                 |(ints, stream, state), _: Mailbox<()>| {
                     if let Ok(Some(req)) = Request::parse(stream.clone()) {
                         let router = Self::from_ints(ints);
