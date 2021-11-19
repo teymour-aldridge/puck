@@ -102,7 +102,7 @@ impl Request {
             reader,
             headers
                 .iter()
-                .find(|(key, _)| key.eq_ignore_ascii_case("content-type"))
+                .find(|(key, _)| key.eq_ignore_ascii_case("content-length"))
                 .and_then(|(_, len)| len.as_str().parse::<usize>().ok()),
         );
 

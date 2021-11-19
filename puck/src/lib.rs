@@ -15,14 +15,14 @@ pub use response::Response;
 
 use response::encoder::Encoder;
 
-pub mod app;
 pub mod body;
+pub mod core;
 pub mod request;
 pub mod response;
 pub mod ws;
 
 /// Return an error 404 not found response.
-pub fn err_404(_: Request) -> Response {
+pub fn err_404() -> Response {
     Response {
         headers: {
             let mut res = HashMap::new();

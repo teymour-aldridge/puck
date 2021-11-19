@@ -3,7 +3,7 @@ use std::io::Write;
 use log::trace;
 use lunatic::net::TcpStream;
 
-use crate::app::UsedStream;
+use crate::core::UsedStream;
 
 use super::{
     frame::Frame,
