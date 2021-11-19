@@ -18,7 +18,17 @@ Let's try to tame the complexity!
 Puck is a (very experimental) HTTP library for the
 [Lunatic Virtual Machine](https://lunatic.solutions).
 
-Have a look at `examples/server` for more details :)
+Have a look at `examples/list` for more details :)
+
+## Goals
+
+- Fast compile times (i.e. not longer than >10s for an incremental build)
+- Correct
+- Secure
+
+## Non-goals
+
+- Be the fastest web framework
 
 ## Licensing
 
