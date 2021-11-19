@@ -6,6 +6,7 @@ use std::fmt::Debug;
 use crate::{body::Body, request::Method, Response};
 
 /// Builds `Response`s.
+#[derive(Default)]
 pub struct ResponseBuilder {
     headers: HashMap<String, String>,
     body: Option<Body>,
@@ -22,18 +23,6 @@ impl Debug for ResponseBuilder {
             .field("reason", &self.reason)
             .field("method", &self.method)
             .finish_non_exhaustive()
-    }
-}
-
-impl Default for ResponseBuilder {
-    fn default() -> Self {
-        Self {
-            headers: HashMap::new(),
-            body: None,
-            status: None,
-            reason: None,
-            method: None,
-        }
     }
 }
 

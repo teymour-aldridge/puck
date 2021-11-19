@@ -126,6 +126,7 @@ impl Stream {
 }
 
 #[derive(Debug)]
+#[allow(unused)]
 ///
 pub struct UsedStream {
     pub(crate) stream: TcpStream,

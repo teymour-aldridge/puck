@@ -102,6 +102,7 @@ pub struct DeserializeChangeset {
 /// An owned analogue of `Op` which can be deserialized.
 ///
 /// Mostly useful for testing.
+#[allow(dead_code)]
 pub struct DeserializeOp {
     id: String,
     instruction: DeserializeInstruction,

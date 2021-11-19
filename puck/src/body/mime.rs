@@ -9,6 +9,7 @@ use std::{borrow::Cow, fmt::Display};
 ///
 /// See [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) for an
 /// introduction to how MIME-types work.
+#[allow(dead_code)]
 pub struct Mime {
     pub(crate) essence: Cow<'static, str>,
     pub(crate) basetype: Cow<'static, str>,

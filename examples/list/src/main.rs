@@ -12,28 +12,26 @@ fn main(_: Mailbox<()>) {
             // todo: iron this API out
             if request.url().path() == "/submit" {
                 match request.method() {
-                    puck::request::Method::Get => {
-                        return stream
-                            .respond(
-                                Response::build()
-                                    .headers(vec![(
-                                        "Content-Type".to_string(),
-                                        "text/html".to_string(),
-                                    )])
-                                    .body(Body::from_string(
-                                        html().head(head().child(title("Submit a message"))).body(
-                                            body().child(
-                                                form()
-                                                    .attribute(malvolio::prelude::Method::Post)
-                                                    .child(input().attribute(Name::new("message")))
-                                                    .child(input().attribute(Type::Submit)),
-                                            ),
+                    puck::request::Method::Get => stream
+                        .respond(
+                            Response::build()
+                                .headers(vec![(
+                                    "Content-Type".to_string(),
+                                    "text/html".to_string(),
+                                )])
+                                .body(Body::from_string(
+                                    html().head(head().child(title("Submit a message"))).body(
+                                        body().child(
+                                            form()
+                                                .attribute(malvolio::prelude::Method::Post)
+                                                .child(input().attribute(Name::new("message")))
+                                                .child(input().attribute(Type::Submit)),
                                         ),
-                                    ))
-                                    .build(),
-                            )
-                            .unwrap()
-                    }
+                                    ),
+                                ))
+                                .build(),
+                        )
+                        .unwrap(),
                     puck::request::Method::Post => {
                         let res = request.take_body().into_string().unwrap();
 
@@ -43,33 +41,27 @@ fn main(_: Mailbox<()>) {
 
                             match state.request(Msg::Add(seg.to_string())).unwrap() {
                                 Reply::Items(_) => unreachable!(),
-                                Reply::Added => {
-                                    return stream
-                                        .respond(
-                                            Response::build()
-                                                .headers(vec![(
-                                                    "Content-Type".to_string(),
-                                                    "text/html".to_string(),
-                                                )])
-                                                .body(Body::from_string(
-                                                    html()
-                                                        .head(
-                                                            head().child(title("Submit a message")),
-                                                        )
-                                                        .body(body().child(h1("Added that item"))),
-                                                ))
-                                                .build(),
-                                        )
-                                        .unwrap()
-                                }
+                                Reply::Added => stream
+                                    .respond(
+                                        Response::build()
+                                            .headers(vec![(
+                                                "Content-Type".to_string(),
+                                                "text/html".to_string(),
+                                            )])
+                                            .body(Body::from_string(
+                                                html()
+                                                    .head(head().child(title("Submit a message")))
+                                                    .body(body().child(h1("Added that item"))),
+                                            ))
+                                            .build(),
+                                    )
+                                    .unwrap(),
                             }
                         } else {
-                            return stream.respond(puck::err_400()).unwrap();
+                            stream.respond(puck::err_400()).unwrap()
                         }
                     }
-                    _ => {
-                        return stream.respond(puck::err_400()).unwrap();
-                    }
+                    _ => stream.respond(puck::err_400()).unwrap(),
                 }
             } else if request.url().path().starts_with("/read/") {
                 let segment = request.url().path().split_at("/read/".len()).1;
@@ -79,7 +71,7 @@ fn main(_: Mailbox<()>) {
                         Reply::Items(items) => items,
                         Reply::Added => unreachable!(),
                     };
-                    return stream
+                    stream
                         .respond(
                             puck::Response::build()
                                 .headers(vec![(
@@ -101,12 +93,12 @@ fn main(_: Mailbox<()>) {
                                 ))
                                 .build(),
                         )
-                        .unwrap();
+                        .unwrap()
                 } else {
-                    return stream.respond(puck::err_404()).unwrap();
+                    stream.respond(puck::err_404()).unwrap()
                 }
             } else {
-                return stream.respond(puck::err_404()).unwrap();
+                stream.respond(puck::err_404()).unwrap()
             }
         });
 }
