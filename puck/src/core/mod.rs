@@ -14,6 +14,8 @@ use crate::{
     Request, Response,
 };
 
+pub mod router;
+
 ///
 #[derive(Debug)]
 pub struct Core<STATE> {
@@ -34,7 +36,9 @@ where
     }
 
     /// Apply the provided function to every request.
-    pub fn for_each(self, func: fn(Request, Stream, STATE) -> Stream) {
+    ///
+    /// This option gives you maximum flexibility.
+    pub fn for_each(self, func: fn(Request, Stream, STATE) -> UsedStream) {
         loop {
             if let Ok((stream, _)) = self.listener.accept() {
                 let pointer = func as *const () as usize;
@@ -88,6 +92,7 @@ pub enum UpgradeError {
 }
 
 impl Stream {
+    // note: no keep_alive support for now!
     fn new(stream: TcpStream, keep_alive: bool) -> Stream {
         Self { stream, keep_alive }
     }
@@ -121,6 +126,7 @@ impl Stream {
 }
 
 #[derive(Debug)]
+#[allow(unused)]
 ///
 pub struct UsedStream {
     pub(crate) stream: TcpStream,
