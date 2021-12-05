@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.47"
+anyhow = "1.0.51"
 httparse = "1.5.1"
 thiserror = "1.0.30"
 url = "2.2.2"
