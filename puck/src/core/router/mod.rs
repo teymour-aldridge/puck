@@ -8,6 +8,8 @@ use crate::Request;
 
 use super::{Stream, UsedStream};
 
+pub mod match_url;
+
 #[allow(missing_docs)]
 #[derive(Copy, Clone)]
 pub struct Route<STATE> {
@@ -48,6 +50,7 @@ impl<STATE: Serialize + DeserializeOwned + Clone> Router<STATE> {
         }
     }
 
+    /// Converts the router into a series of integers.
     fn as_ints(&self) -> Vec<(usize, usize)> {
         self.routes
             .iter()
