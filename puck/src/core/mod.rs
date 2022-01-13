@@ -14,6 +14,8 @@ use crate::{
     Request, Response,
 };
 
+use self::router::Router;
+
 pub mod router;
 
 ///
@@ -35,9 +37,42 @@ where
         })
     }
 
+    /// Serves the current router, forever, on the bound address.
+    pub fn serve_router(self, router: Router<STATE>) {
+        let ints = router.as_ints();
+
+        loop {
+            if let Ok((stream, _)) = self.listener.accept() {
+                let _ = process::spawn_with(
+                    (stream, ints.clone(), self.state.clone()),
+                    |(stream, ints, state), _: Mailbox<()>| {
+                        let router = Router::<STATE>::from_ints(ints);
+
+                        let req = if let Some(req) = Request::parse(stream.clone()).unwrap() {
+                            req
+                        } else {
+                            let stream = Stream::new(stream, false);
+                            // can't do much if this fails
+                            // todo: log it somehow
+                            let _ = stream.respond(crate::err_400());
+                            return;
+                        };
+
+                        let stream = Stream::new(stream, false);
+
+                        router.respond(req, stream, state);
+                    },
+                );
+            }
+        }
+    }
+
     /// Apply the provided function to every request.
     ///
     /// This option gives you maximum flexibility.
+    ///
+    /// note: if you choose this option, then the router will not be automatically applied to each
+    /// request.
     pub fn for_each(self, func: fn(Request, Stream, STATE) -> UsedStream) {
         loop {
             if let Ok((stream, _)) = self.listener.accept() {
@@ -48,7 +83,7 @@ where
                     |(pointer, stream, state), _: Mailbox<()>| {
                         let reconstructed_func = pointer as *const ();
                         let reconstructed_func = unsafe {
-                            mem::transmute::<*const (), fn(Request, Stream, STATE) -> Stream>(
+                            mem::transmute::<*const (), fn(Request, Stream, STATE) -> UsedStream>(
                                 reconstructed_func,
                             )
                         };
