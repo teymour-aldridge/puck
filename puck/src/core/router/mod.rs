@@ -44,14 +44,18 @@ pub struct Router<STATE> {
 
 impl<STATE: Serialize + DeserializeOwned + Clone> Router<STATE> {
     /// Constructs a new [Router].
-    pub fn new(routes: impl IntoIterator<Item = Route<STATE>>) -> Self {
-        Self {
-            routes: routes.into_iter().collect::<Vec<_>>(),
-        }
+    pub fn new() -> Self {
+        Self { routes: vec![] }
+    }
+
+    /// Add a route to the router.
+    pub fn route(mut self, route: Route<STATE>) -> Self {
+        self.routes.push(route);
+        self
     }
 
     /// Converts the router into a series of integers.
-    fn as_ints(&self) -> Vec<(usize, usize)> {
+    pub(crate) fn as_ints(&self) -> Vec<(usize, usize)> {
         self.routes
             .iter()
             .map(|route| {
@@ -64,7 +68,7 @@ impl<STATE: Serialize + DeserializeOwned + Clone> Router<STATE> {
     }
 
     /// Reconstructs the router from `Router::as_ints`. Panics if the data is not in a valid form.
-    fn from_ints(ints: Vec<(usize, usize)>) -> Self {
+    pub(crate) fn from_ints(ints: Vec<(usize, usize)>) -> Self {
         let routes = ints
             .iter()
             .map(|(matcher, handler)| Route {
@@ -108,7 +112,7 @@ impl<STATE: Serialize + DeserializeOwned + Clone> Router<STATE> {
         }
     }
 
-    fn respond(&self, req: Request, stream: Stream, state: STATE) {
+    pub(crate) fn respond(&self, req: Request, stream: Stream, state: STATE) {
         for route in &self.routes {
             if (route.matcher)(&req) {
                 (route.handler)(req, stream, state);
