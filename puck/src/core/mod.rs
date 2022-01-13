@@ -43,23 +43,26 @@ where
 
         loop {
             if let Ok((stream, _)) = self.listener.accept() {
-                let _ = process::spawn_with((stream, ints.clone(), self.state.clone()), |(stream, ints, state), _: Mailbox<()>| {
-                    let router = Router::<STATE>::from_ints(ints);
+                let _ = process::spawn_with(
+                    (stream, ints.clone(), self.state.clone()),
+                    |(stream, ints, state), _: Mailbox<()>| {
+                        let router = Router::<STATE>::from_ints(ints);
 
-                    let req = if let Some(req) = Request::parse(stream.clone()).unwrap() {
-                        req
-                    } else {
+                        let req = if let Some(req) = Request::parse(stream.clone()).unwrap() {
+                            req
+                        } else {
+                            let stream = Stream::new(stream, false);
+                            // can't do much if this fails
+                            // todo: log it somehow
+                            let _ = stream.respond(crate::err_400());
+                            return;
+                        };
+
                         let stream = Stream::new(stream, false);
-                        // can't do much if this fails
-                        // todo: log it somehow
-                        let _ = stream.respond(crate::err_400());
-                        return;
-                    };
 
-                    let stream = Stream::new(stream, false);
-
-                    router.respond(req, stream, state);
-                });
+                        router.respond(req, stream, state);
+                    },
+                );
             }
         }
     }

@@ -37,7 +37,7 @@ impl<STATE> Route<STATE> {
 
 /// A [Router] provides an easy way to match different types of HTTP request and handle them
 /// differently.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Router<STATE> {
     routes: Vec<Route<STATE>>,
 }
