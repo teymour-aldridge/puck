@@ -27,4 +27,3 @@ scraper = "0.12.0"
 
 [features]
 apply = []
-_test_fuzzing = ["proptest", "apply"]
