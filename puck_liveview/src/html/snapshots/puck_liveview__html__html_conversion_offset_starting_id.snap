@@ -4,22 +4,13 @@ expression: output
 
 ---
 Element {
-    id: [
-        0,
-        0,
-        0,
-    ],
+    id: 1,
     name: "form",
     attributes: {},
     listeners: [],
     children: [
         Element {
-            id: [
-                0,
-                0,
-                0,
-                0,
-            ],
+            id: 2,
             name: "input",
             attributes: {
                 "type": "text",
@@ -30,12 +21,7 @@ Element {
             key: None,
         },
         Element {
-            id: [
-                0,
-                0,
-                0,
-                1,
-            ],
+            id: 3,
             name: "input",
             attributes: {
                 "type": "submit",
