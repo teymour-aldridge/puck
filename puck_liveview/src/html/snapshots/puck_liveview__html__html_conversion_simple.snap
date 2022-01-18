@@ -4,9 +4,7 @@ expression: output
 
 ---
 Element {
-    id: [
-        0,
-    ],
+    id: 0,
     name: "div",
     attributes: {},
     listeners: [],

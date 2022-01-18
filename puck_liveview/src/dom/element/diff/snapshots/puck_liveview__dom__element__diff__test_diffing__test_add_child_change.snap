@@ -6,9 +6,9 @@ expression: c
 Changeset {
     ops: [
         Op {
-            id: "0-1-",
+            id: "2",
             instruction: InsertAfter {
-                after_id: "0-1-",
+                after_id: "2",
             },
         },
     ],

@@ -6,15 +6,15 @@ expression: c
 Changeset {
     ops: [
         Op {
-            id: "0-0-",
+            id: "3",
             instruction: SetId {
-                value: "0-1-",
+                value: "2",
             },
         },
         Op {
-            id: "0-0-",
+            id: "3",
             instruction: InsertBefore {
-                before_id: "0-1-",
+                before_id: "2",
             },
         },
     ],

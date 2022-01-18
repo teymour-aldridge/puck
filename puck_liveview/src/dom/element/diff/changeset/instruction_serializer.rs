@@ -5,25 +5,27 @@ use serde::{
 
 use super::{Changeset, Instruction, Op};
 
-/// Serializes instructions, but in a way that is easier to handle on the JS side.
-pub(crate) struct JsFriendlyInstructionSerializer<'a>(pub(crate) Changeset<'a>);
+/// Serializes instructions from a [super::Changeset] in a way that is easier to parse on the JS
+/// side than what would be optained using the serde derive macros.
+pub(crate) struct InstructionSerializer<'a>(pub(crate) Changeset<'a>);
 
-impl<'a> Serialize for JsFriendlyInstructionSerializer<'a> {
+impl<'a> Serialize for InstructionSerializer<'a> {
     fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
         let mut seq = s.serialize_seq(Some(self.0.ops.len()))?;
         for op in self.0.ops.iter() {
-            seq.serialize_element(&JsFriendlyOpSerializer(op))?;
+            seq.serialize_element(&OpSerializer(op))?;
         }
         seq.end()
     }
 }
 
-struct JsFriendlyOpSerializer<'a, 'b>(&'b Op<'a>);
+struct OpSerializer<'a, 'b>(&'b Op<'a>);
 
-impl<'a, 'b> Serialize for JsFriendlyOpSerializer<'a, 'b> {
+impl<'a, 'b> Serialize for OpSerializer<'a, 'b> {
+    // todo: use acronyms for types of operation to make size smaller
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,

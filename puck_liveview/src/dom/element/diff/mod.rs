@@ -2,6 +2,7 @@ pub(crate) mod changeset;
 
 #[cfg(test)]
 #[cfg(not(target_arch = "wasm32"))]
+#[allow(unused_parens)]
 mod test_diffing;
 
 use std::borrow::Cow;
