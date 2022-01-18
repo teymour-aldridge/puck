@@ -225,7 +225,7 @@ fn test_html_conversion() {
     use malvolio::prelude::*;
 
     let tree = Div::new();
-    let output = tree.wrap().into_element(vec![0]);
+    let output = tree.wrap().into_element(&mut IdGen::new());
     insta::assert_debug_snapshot!("html_conversion_simple", output);
 
     let bigger_tree = Div::new().wrap().child(H1::new("Heading 1").wrap()).child(
@@ -234,13 +234,15 @@ fn test_html_conversion() {
             .wrap()
             .listener(ListenerRef::new("a_listener", "click")),
     );
-    let output = bigger_tree.into_element(vec![0]);
+    let output = bigger_tree.into_element(&mut IdGen::new());
     insta::assert_debug_snapshot!("html_conversion_medium", output);
 
     let id_not_starting_from_zero = Form::new()
         .wrap()
         .child(Input::new().attribute(Type::Text).wrap())
         .child(Input::new().attribute(Type::Submit).wrap());
-    let output = id_not_starting_from_zero.into_element(vec![0, 0, 0]);
+    let mut idgen = IdGen::new();
+    idgen.new_id();
+    let output = id_not_starting_from_zero.into_element(&mut idgen);
     insta::assert_debug_snapshot!("html_conversion_offset_starting_id", output);
 }

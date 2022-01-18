@@ -1,16 +1,17 @@
+use std::collections::HashMap;
+
 use crate::dom::{element::Element, listener::ListenerRef};
-use maplit::hashmap;
 
 #[test]
 fn test_name_change() {
     let old = Element {
-        id: vec![0],
+        id: 0,
         name: "div".into(),
         ..Default::default()
     };
 
     let new = Element {
-        id: vec![0],
+        id: 0,
         name: "p".into(),
         ..Default::default()
     };
@@ -23,14 +24,14 @@ fn test_name_change() {
 #[test]
 fn test_single_element_attribute_change() {
     let old = Element {
-        id: vec![0],
+        id: 0,
         name: "div".into(),
         attributes: {
             let mut res = HashMap::new();
-            res.insert("class".to_string(), "one".to_string());
+            res.insert("class".into(), "one".into());
             res.insert(
-                "attribute-which-doesn-t-exist-after-diffing".to_string(),
-                "1".to_string(),
+                "attribute-which-doesn-t-exist-after-diffing".into(),
+                "1".into(),
             );
             res
         },
@@ -38,15 +39,12 @@ fn test_single_element_attribute_change() {
     };
 
     let new = Element {
-        id: vec![0],
+        id: 0,
         name: "div".into(),
         attributes: {
             let mut res = HashMap::new();
-            res.insert("class".to_string(), "two".to_string());
-            res.insert(
-                "new-attribute-added-after-diffing".to_string(),
-                "value".to_string(),
-            );
+            res.insert("class".into(), "two".into());
+            res.insert("new-attribute-added-after-diffing".into(), "value".into());
             res
         },
         ..Default::default()
@@ -77,14 +75,14 @@ fn test_single_element_attribute_change() {
 #[test]
 fn test_single_element_text_change() {
     let old = Element {
-        id: vec![0],
+        id: 0,
         name: "p".into(),
         text: Some("the cat sat on the mat".into()),
         ..Default::default()
     };
 
     let new = Element {
-        id: vec![0],
+        id: 0,
         name: "p".into(),
         text: Some("the mat sat on the cat".into()),
         ..Default::default()
@@ -97,11 +95,11 @@ fn test_single_element_text_change() {
 #[test]
 fn test_add_child_change() {
     let old = Element {
-        id: vec![0],
+        id: 0,
         name: "div".into(),
         children: vec![Element {
-            id: vec![0, 0],
-            key: Some("a".to_string()),
+            id: 3,
+            key: Some("a".into()),
             name: "p".into(),
             text: Some("the cat sat on the mat".into()),
             ..Default::default()
@@ -110,20 +108,20 @@ fn test_add_child_change() {
     };
 
     let new = Element {
-        id: vec![0],
+        id: 0,
         name: "div".into(),
         children: vec![
             Element {
-                id: vec![0, 0],
+                id: 3,
                 name: "p".into(),
-                key: Some("a".to_string()),
+                key: Some("a".into()),
                 text: Some("the cat sat on the mat".into()),
                 ..Default::default()
             },
             Element {
-                id: vec![0, 1],
+                id: 2,
                 name: "p".into(),
-                key: Some("b".to_string()),
+                key: Some("b".into()),
                 text: Some("the mat sat on the cat".into()),
                 ..Default::default()
             },
@@ -138,11 +136,11 @@ fn test_add_child_change() {
 #[test]
 fn test_add_child_before_change() {
     let old = Element {
-        id: vec![0],
+        id: 0,
         name: "div".into(),
         children: vec![Element {
-            id: vec![0, 0],
-            key: Some("a".to_string()),
+            id: 3,
+            key: Some("a".into()),
             name: "p".into(),
             text: Some("the cat sat on the mat".into()),
             ..Default::default()
@@ -151,20 +149,20 @@ fn test_add_child_before_change() {
     };
 
     let new = Element {
-        id: vec![0],
+        id: 0,
         name: "div".into(),
         children: vec![
             Element {
-                id: vec![0, 0],
+                id: 3,
                 name: "p".into(),
-                key: Some("b".to_string()),
+                key: Some("b".into()),
                 text: Some("the mat sat on the cat".into()),
                 ..Default::default()
             },
             Element {
-                id: vec![0, 1],
+                id: 2,
                 name: "p".into(),
-                key: Some("a".to_string()),
+                key: Some("a".into()),
                 text: Some("the cat sat on the mat".into()),
                 ..Default::default()
             },
@@ -179,23 +177,23 @@ fn test_add_child_before_change() {
 #[test]
 fn test_more_complex_diff() {
     let old = Element {
-        id: vec![0],
+        id: 0,
         name: std::borrow::Cow::Borrowed("div"),
         attributes: {
             let _cap = <[()]>::len(&[()]);
             let mut _map = ::std::collections::HashMap::with_capacity(_cap);
-            let_ = _map.insert(("class".into()), ("message-list".into()));
+            let _ = _map.insert(("class".into()), ("message-list".into()));
             _map
         },
         listeners: vec![],
         children: vec![
             Element {
-                id: vec![0, 0],
+                id: 3,
                 name: std::borrow::Cow::Borrowed("div"),
                 attributes: HashMap::new(),
                 listeners: vec![],
                 children: vec![Element {
-                    id: vec![0, 0, 0],
+                    id: 4,
                     name: std::borrow::Cow::Borrowed("input"),
                     attributes: HashMap::new(),
                     listeners: vec![ListenerRef::new("msg-input", "input")],
@@ -207,12 +205,12 @@ fn test_more_complex_diff() {
                 key: None,
             },
             Element {
-                id: vec![0, 1],
+                id: 2,
                 name: std::borrow::Cow::Borrowed("div"),
                 attributes: HashMap::new(),
                 listeners: vec![],
                 children: vec![Element {
-                    id: vec![0, 1, 0],
+                    id: 5,
                     name: std::borrow::Cow::Borrowed("button"),
                     attributes: HashMap::new(),
                     listeners: vec![ListenerRef::new("msg-submit", "click")],
@@ -228,23 +226,23 @@ fn test_more_complex_diff() {
         key: None,
     };
     let new = Element {
-        id: vec![0],
+        id: 0,
         name: std::borrow::Cow::Borrowed("div"),
         attributes: {
             let _cap = <[()]>::len(&[()]);
             let mut _map = ::std::collections::HashMap::with_capacity(_cap);
-            let_ = _map.insert(("class".into()), ("message-list".into()));
+            let _ = _map.insert(("class".into()), ("message-list".into()));
             _map
         },
         listeners: vec![],
         children: vec![
             Element {
-                id: vec![0, 0],
+                id: 3,
                 name: std::borrow::Cow::Borrowed("div"),
                 attributes: HashMap::new(),
                 listeners: vec![],
                 children: vec![Element {
-                    id: vec![0, 0, 0],
+                    id: 4,
                     name: std::borrow::Cow::Borrowed("input"),
                     attributes: HashMap::new(),
                     listeners: vec![ListenerRef::new(
@@ -259,12 +257,12 @@ fn test_more_complex_diff() {
                 key: None,
             },
             Element {
-                id: vec![0, 1],
+                id: 2,
                 name: std::borrow::Cow::Borrowed("div"),
                 attributes: HashMap::new(),
                 listeners: vec![],
                 children: vec![Element {
-                    id: vec![0, 1, 0],
+                    id: 5,
                     name: std::borrow::Cow::Borrowed("button"),
                     attributes: HashMap::new(),
                     listeners: vec![ListenerRef::new(
@@ -279,23 +277,23 @@ fn test_more_complex_diff() {
                 key: None,
             },
             Element {
-                id: vec![0, 2],
+                id: 9,
                 name: std::borrow::Cow::Borrowed("div"),
                 attributes: {
                     let _cap = <[()]>::len(&[()]);
                     let mut _map = ::std::collections::HashMap::with_capacity(_cap);
-                    let_ = _map.insert(("class".into()), ("message-container".into()));
+                    let _ = _map.insert(("class".into()), ("message-container".into()));
                     _map
                 },
                 listeners: vec![],
                 children: vec![
                     Element {
-                        id: vec![0, 2, 0],
+                        id: 8,
                         name: std::borrow::Cow::Borrowed("p"),
                         attributes: {
                             let _cap = <[()]>::len(&[()]);
                             let mut _map = ::std::collections::HashMap::with_capacity(_cap);
-                            let_ = _map.insert(("class".into()), ("message-sent-at".into()));
+                            let _ = _map.insert(("class".into()), ("message-sent-at".into()));
                             _map
                         },
                         listeners: vec![],
@@ -304,12 +302,12 @@ fn test_more_complex_diff() {
                         key: None,
                     },
                     Element {
-                        id: vec![0, 2, 1],
+                        id: 6,
                         name: std::borrow::Cow::Borrowed("p"),
                         attributes: {
                             let _cap = <[()]>::len(&[()]);
                             let mut _map = ::std::collections::HashMap::with_capacity(_cap);
-                            let_ = _map.insert(("class".into()), ("message-author".into()));
+                            let _ = _map.insert(("class".into()), ("message-author".into()));
                             _map
                         },
                         listeners: vec![],
@@ -318,12 +316,12 @@ fn test_more_complex_diff() {
                         key: None,
                     },
                     Element {
-                        id: vec![0, 2, 2],
+                        id: 7,
                         name: std::borrow::Cow::Borrowed("p"),
                         attributes: {
                             let _cap = <[()]>::len(&[()]);
                             let mut _map = ::std::collections::HashMap::with_capacity(_cap);
-                            let_ = _map.insert(("class".into()), ("message-contents".into()));
+                            let _ = _map.insert(("class".into()), ("message-contents".into()));
                             _map
                         },
                         listeners: vec![],

@@ -49,18 +49,18 @@ mod test_render {
     #[test]
     fn test_render_nested_tags() {
         let tree = Element {
-            id: vec![0],
+            id: 0,
             name: "div".into(),
             children: vec![
                 Element {
-                    id: vec![0, 0],
+                    id: 1,
                     name: "p".into(),
                     key: Some("a".to_string()),
                     text: Some("the cat sat on the mat".into()),
                     ..Default::default()
                 },
                 Element {
-                    id: vec![0, 1],
+                    id: 2,
                     name: "p".into(),
                     key: Some("b".to_string()),
                     text: Some("the mat sat on the cat".into()),
