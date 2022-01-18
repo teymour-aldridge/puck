@@ -10,6 +10,8 @@ autobahn/server
 .fable
 .package-lock.json
 node_modules
+# fuzzing
+fuzz
 
 .fake
 .ionide

@@ -78,8 +78,6 @@ impl Element {
     /// Compares the text of two nodes, and emits the relevant update needed to make sure that the
     /// text is the same.
     fn diff_text<'a>(&'a self, other: &'a Element) -> Changeset<'a> {
-        dbg!(&self.text);
-        dbg!(&other.text);
         let mut cs = Changeset::empty();
 
         if self.text != other.text {
