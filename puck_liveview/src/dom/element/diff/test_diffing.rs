@@ -1,6 +1,5 @@
-use maplit::hashmap;
-
 use crate::dom::{element::Element, listener::ListenerRef};
+use maplit::hashmap;
 
 #[test]
 fn test_name_change() {
@@ -26,9 +25,14 @@ fn test_single_element_attribute_change() {
     let old = Element {
         id: vec![0],
         name: "div".into(),
-        attributes: hashmap! {
-            "class".into() => "one".into(),
-            "attribute-which-doesn-t-exist-after-diffing".into() => "1".into()
+        attributes: {
+            let mut res = HashMap::new();
+            res.insert("class".to_string(), "one".to_string());
+            res.insert(
+                "attribute-which-doesn-t-exist-after-diffing".to_string(),
+                "1".to_string(),
+            );
+            res
         },
         ..Default::default()
     };
@@ -36,9 +40,14 @@ fn test_single_element_attribute_change() {
     let new = Element {
         id: vec![0],
         name: "div".into(),
-        attributes: hashmap! {
-            "class".into() => "two".into(),
-            "new-attribute-added-after-diffing".into() => "value".into()
+        attributes: {
+            let mut res = HashMap::new();
+            res.insert("class".to_string(), "two".to_string());
+            res.insert(
+                "new-attribute-added-after-diffing".to_string(),
+                "value".to_string(),
+            );
+            res
         },
         ..Default::default()
     };
@@ -172,20 +181,23 @@ fn test_more_complex_diff() {
     let old = Element {
         id: vec![0],
         name: std::borrow::Cow::Borrowed("div"),
-        attributes: hashmap! {
-            "class".into() => "message-list".into(),
+        attributes: {
+            let _cap = <[()]>::len(&[()]);
+            let mut _map = ::std::collections::HashMap::with_capacity(_cap);
+            let_ = _map.insert(("class".into()), ("message-list".into()));
+            _map
         },
         listeners: vec![],
         children: vec![
             Element {
                 id: vec![0, 0],
                 name: std::borrow::Cow::Borrowed("div"),
-                attributes: hashmap! {},
+                attributes: HashMap::new(),
                 listeners: vec![],
                 children: vec![Element {
                     id: vec![0, 0, 0],
                     name: std::borrow::Cow::Borrowed("input"),
-                    attributes: hashmap! {},
+                    attributes: HashMap::new(),
                     listeners: vec![ListenerRef::new("msg-input", "input")],
                     children: vec![],
                     text: None,
@@ -197,12 +209,12 @@ fn test_more_complex_diff() {
             Element {
                 id: vec![0, 1],
                 name: std::borrow::Cow::Borrowed("div"),
-                attributes: hashmap! {},
+                attributes: HashMap::new(),
                 listeners: vec![],
                 children: vec![Element {
                     id: vec![0, 1, 0],
                     name: std::borrow::Cow::Borrowed("button"),
-                    attributes: hashmap! {},
+                    attributes: HashMap::new(),
                     listeners: vec![ListenerRef::new("msg-submit", "click")],
                     children: vec![],
                     text: Some(std::borrow::Cow::Borrowed("Send message")),
@@ -218,20 +230,23 @@ fn test_more_complex_diff() {
     let new = Element {
         id: vec![0],
         name: std::borrow::Cow::Borrowed("div"),
-        attributes: hashmap! {
-            "class".into() => "message-list".into(),
+        attributes: {
+            let _cap = <[()]>::len(&[()]);
+            let mut _map = ::std::collections::HashMap::with_capacity(_cap);
+            let_ = _map.insert(("class".into()), ("message-list".into()));
+            _map
         },
         listeners: vec![],
         children: vec![
             Element {
                 id: vec![0, 0],
                 name: std::borrow::Cow::Borrowed("div"),
-                attributes: hashmap! {},
+                attributes: HashMap::new(),
                 listeners: vec![],
                 children: vec![Element {
                     id: vec![0, 0, 0],
                     name: std::borrow::Cow::Borrowed("input"),
-                    attributes: hashmap! {},
+                    attributes: HashMap::new(),
                     listeners: vec![ListenerRef::new(
                         "msg-input".to_string(),
                         "input".to_string(),
@@ -246,12 +261,12 @@ fn test_more_complex_diff() {
             Element {
                 id: vec![0, 1],
                 name: std::borrow::Cow::Borrowed("div"),
-                attributes: hashmap! {},
+                attributes: HashMap::new(),
                 listeners: vec![],
                 children: vec![Element {
                     id: vec![0, 1, 0],
                     name: std::borrow::Cow::Borrowed("button"),
-                    attributes: hashmap! {},
+                    attributes: HashMap::new(),
                     listeners: vec![ListenerRef::new(
                         "msg-submit".to_string(),
                         "click".to_string(),
@@ -266,16 +281,22 @@ fn test_more_complex_diff() {
             Element {
                 id: vec![0, 2],
                 name: std::borrow::Cow::Borrowed("div"),
-                attributes: hashmap! {
-                    "class".into() =>  "message-container".into(),
+                attributes: {
+                    let _cap = <[()]>::len(&[()]);
+                    let mut _map = ::std::collections::HashMap::with_capacity(_cap);
+                    let_ = _map.insert(("class".into()), ("message-container".into()));
+                    _map
                 },
                 listeners: vec![],
                 children: vec![
                     Element {
                         id: vec![0, 2, 0],
                         name: std::borrow::Cow::Borrowed("p"),
-                        attributes: hashmap! {
-                            "class".into() => "message-sent-at".into(),
+                        attributes: {
+                            let _cap = <[()]>::len(&[()]);
+                            let mut _map = ::std::collections::HashMap::with_capacity(_cap);
+                            let_ = _map.insert(("class".into()), ("message-sent-at".into()));
+                            _map
                         },
                         listeners: vec![],
                         children: vec![],
@@ -285,8 +306,11 @@ fn test_more_complex_diff() {
                     Element {
                         id: vec![0, 2, 1],
                         name: std::borrow::Cow::Borrowed("p"),
-                        attributes: hashmap! {
-                            "class".into() => "message-author".into(),
+                        attributes: {
+                            let _cap = <[()]>::len(&[()]);
+                            let mut _map = ::std::collections::HashMap::with_capacity(_cap);
+                            let_ = _map.insert(("class".into()), ("message-author".into()));
+                            _map
                         },
                         listeners: vec![],
                         children: vec![],
@@ -296,8 +320,11 @@ fn test_more_complex_diff() {
                     Element {
                         id: vec![0, 2, 2],
                         name: std::borrow::Cow::Borrowed("p"),
-                        attributes: hashmap! {
-                            "class".into() => "message-contents".into(),
+                        attributes: {
+                            let _cap = <[()]>::len(&[()]);
+                            let mut _map = ::std::collections::HashMap::with_capacity(_cap);
+                            let_ = _map.insert(("class".into()), ("message-contents".into()));
+                            _map
                         },
                         listeners: vec![],
                         children: vec![],

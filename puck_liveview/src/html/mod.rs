@@ -1,5 +1,6 @@
+use std::collections::HashMap;
+
 use malvolio::prelude::BodyNode;
-use maplit::hashmap;
 
 use crate::dom::{element::Element, listener::ListenerRef};
 
@@ -86,7 +87,7 @@ impl WrappedBodyNode {
             BodyNode::Br(_) => Element {
                 id: id_gen.new_id(),
                 name: std::borrow::Cow::Borrowed("br"),
-                attributes: hashmap! {},
+                attributes: HashMap::new(),
                 listeners: vec![],
                 children: vec![],
                 text: None,
@@ -161,7 +162,7 @@ impl WrappedBodyNode {
                 Element {
                     id: id_gen.new_id(),
                     name: std::borrow::Cow::Borrowed("div"),
-                    attributes: hashmap! {},
+                    attributes: HashMap::new(),
                     listeners: vec![],
                     children: vec![],
                     text: Some(noscript.text),
