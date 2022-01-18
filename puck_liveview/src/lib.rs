@@ -2,6 +2,7 @@
 extern crate derive_builder;
 
 pub mod client;
+pub mod component;
 pub mod dom;
 pub mod html;
 pub mod init;

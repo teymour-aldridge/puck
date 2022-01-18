@@ -12,7 +12,7 @@ impl<'a> Changeset<'a> {
     ///
     /// **This method is only available if you have activated the `apply` feature.**
     ///
-    /// This method is probably not that useful to you – it is here for testing purposes.
+    /// This method is probably not useful to you – it is here for testing purposes.
     pub fn apply(&self, element: &mut Element) {
         for op in self.ops.iter() {
             let el_id = Self::parse(op.id.clone());
@@ -134,7 +134,7 @@ impl<'a> Changeset<'a> {
                     element: _,
                     html: _,
                 } => {
-                    panic!("you should not be calling this method from within this test")
+                    panic!("this method should not be called from within this test")
                 }
                 super::Instruction::RemoveAttribute { key } => {
                     Self::find_and_mutate(element, el_id, |el| {
@@ -156,19 +156,15 @@ impl<'a> Changeset<'a> {
     }
 
     fn try_parse(id: impl AsRef<str>) -> Result<Vec<u32>, ParseIntError> {
-        id.as_ref()
-            .split('-')
-            .filter(|segment| !segment.is_empty())
-            .map(|input| u32::from_str(input))
-            .collect::<Result<Vec<_>, _>>()
+        id.parse::<usize>()
     }
 
-    fn parse(id: impl AsRef<str>) -> Vec<u32> {
+    fn parse(id: impl AsRef<str>) -> usize {
         Self::try_parse(id.as_ref()).expect(&format!("could not parse the id {:#?}", id.as_ref()))
     }
 
     /// Conducts a depth-first search through the tree for the element.
-    fn find_el_with_id(id: Vec<u32>, element: &mut Element) -> Option<&mut Element> {
+    fn find_el_with_id(id: usize, element: &mut Element) -> Option<&mut Element> {
         if id == element.id {
             return Some(element);
         }
@@ -179,17 +175,5 @@ impl<'a> Changeset<'a> {
             }
         }
         None
-    }
-}
-
-#[cfg(test)]
-#[cfg(not(target_arch = "wasm32"))]
-mod small_unit_tests_for_apply {
-    use super::*;
-
-    #[test]
-    fn test_id_parse() {
-        assert_eq!(vec![0], Changeset::parse("0-"));
-        assert_eq!(vec![0, 1, 2, 3], Changeset::parse("0-1-2-3"));
     }
 }

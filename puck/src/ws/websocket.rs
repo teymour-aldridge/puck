@@ -11,14 +11,17 @@ use super::{
     send::{self, send_frame, SendFrameError},
 };
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 /// A WebSocket connection over a duplex stream.
+///
+/// note: this _can_ be sent from one process to another, but it is intended that this struct
+/// only be used from one process at once
 pub struct WebSocket {
     stream: TcpStream,
     state: WebSocketState,
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 /// The state of the WebSocket connection (either open or closed).
 pub enum WebSocketState {
     /// The connection is open.
