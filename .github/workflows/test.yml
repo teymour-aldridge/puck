@@ -55,13 +55,8 @@ jobs:
         run: curl https://i.jpillora.com/lunatic-solutions/lunatic@v0.3.1! | sudo bash
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: nightly-2022-01-18
           override: true
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: false
-          target: wasm32-wasi
       - uses: Swatinem/rust-cache@v1
       - name: Run native tests
         run: (cd puck_liveview && cargo test --features apply --target x86_64-unknown-linux-gnu)
