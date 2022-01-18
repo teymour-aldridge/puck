@@ -3,6 +3,10 @@ use maplit::hashmap;
 
 use crate::dom::{element::Element, listener::ListenerRef};
 
+use self::id::IdGen;
+
+mod id;
+
 #[derive(Debug)]
 pub struct WrappedBodyNode {
     node: BodyNode,
@@ -11,7 +15,7 @@ pub struct WrappedBodyNode {
 }
 
 macro_rules! map_heading_to_element {
-    ($self:ident, $id:ident, $h:ident) => {{
+    ($self:ident, $id:expr, $h:ident) => {{
         let $h = $h.into_pub_fields();
         Element {
             id: $id,
@@ -27,44 +31,37 @@ macro_rules! map_heading_to_element {
 }
 
 impl WrappedBodyNode {
-    pub fn into_element(self, id: Vec<u32>) -> Element {
-        let children_mapper = |(index, child): (usize, WrappedBodyNode)| {
-            let mut id = id.clone();
-            id.push(index as u32);
-            child.into_element(id)
-        };
-
+    pub fn into_element(self, id_gen: &mut IdGen) -> Element {
         match self.node {
             BodyNode::H1(h1) => {
-                map_heading_to_element!(self, id, h1)
+                map_heading_to_element!(self, id_gen.new_id(), h1)
             }
             BodyNode::H2(h2) => {
-                map_heading_to_element!(self, id, h2)
+                map_heading_to_element!(self, id_gen.new_id(), h2)
             }
             BodyNode::H3(h3) => {
-                map_heading_to_element!(self, id, h3)
+                map_heading_to_element!(self, id_gen.new_id(), h3)
             }
             BodyNode::H4(h4) => {
-                map_heading_to_element!(self, id, h4)
+                map_heading_to_element!(self, id_gen.new_id(), h4)
             }
             BodyNode::H5(h5) => {
-                map_heading_to_element!(self, id, h5)
+                map_heading_to_element!(self, id_gen.new_id(), h5)
             }
             BodyNode::H6(h6) => {
-                map_heading_to_element!(self, id, h6)
+                map_heading_to_element!(self, id_gen.new_id(), h6)
             }
             BodyNode::P(p) => {
                 let p = p.into_pub_fields();
                 Element {
-                    id: id.clone(),
+                    id: id_gen.new_id(),
                     name: std::borrow::Cow::Borrowed("p"),
                     attributes: p.attrs,
                     listeners: self.listeners,
                     children: self
                         .children
                         .into_iter()
-                        .enumerate()
-                        .map(children_mapper)
+                        .map(|child| child.into_element(id_gen))
                         .collect(),
                     text: Some(p.text),
                     key: None,
@@ -73,22 +70,21 @@ impl WrappedBodyNode {
             BodyNode::Form(form) => {
                 let form = form.into_pub_fields();
                 Element {
-                    id: id.clone(),
+                    id: id_gen.new_id(),
                     name: std::borrow::Cow::Borrowed("form"),
                     attributes: form.attrs,
                     listeners: self.listeners,
                     children: self
                         .children
                         .into_iter()
-                        .enumerate()
-                        .map(children_mapper)
+                        .map(|child| child.into_element(id_gen))
                         .collect(),
                     text: None,
                     key: None,
                 }
             }
             BodyNode::Br(_) => Element {
-                id,
+                id: id_gen.new_id(),
                 name: std::borrow::Cow::Borrowed("br"),
                 attributes: hashmap! {},
                 listeners: vec![],
@@ -99,15 +95,14 @@ impl WrappedBodyNode {
             BodyNode::Div(div) => {
                 let div = div.into_pub_fields();
                 Element {
-                    id: id.clone(),
+                    id: id_gen.new_id(),
                     name: std::borrow::Cow::Borrowed("div"),
                     attributes: div.attrs,
                     listeners: self.listeners,
                     children: self
                         .children
                         .into_iter()
-                        .enumerate()
-                        .map(children_mapper)
+                        .map(|child| child.into_element(id_gen))
                         .collect(),
                     text: None,
                     key: None,
@@ -116,7 +111,7 @@ impl WrappedBodyNode {
             BodyNode::A(a) => {
                 let a = a.into_pub_fields();
                 Element {
-                    id: id.clone(),
+                    id: id_gen.new_id(),
                     name: std::borrow::Cow::Borrowed("a"),
                     attributes: a.attrs,
                     listeners: self.listeners,
@@ -128,35 +123,33 @@ impl WrappedBodyNode {
             BodyNode::Input(input) => {
                 let input = input.into_pub_fields();
                 Element {
-                    id: id.clone(),
+                    id: id_gen.new_id(),
                     name: std::borrow::Cow::Borrowed("input"),
                     attributes: input.attrs,
                     listeners: self.listeners,
                     children: self
                         .children
                         .into_iter()
-                        .enumerate()
-                        .map(children_mapper)
+                        .map(|child| child.into_element(id_gen))
                         .collect(),
                     text: None,
                     key: None,
                 }
             }
             BodyNode::Label(label) => {
-                map_heading_to_element!(self, id, label)
+                map_heading_to_element!(self, id_gen.new_id(), label)
             }
             BodyNode::Select(select) => {
                 let select = select.into_pub_fields();
                 Element {
-                    id: id.clone(),
+                    id: id_gen.new_id(),
                     name: std::borrow::Cow::Borrowed("div"),
                     attributes: select.attrs,
                     listeners: self.listeners,
                     children: self
                         .children
                         .into_iter()
-                        .enumerate()
-                        .map(children_mapper)
+                        .map(|child| child.into_element(id_gen))
                         .collect(),
                     text: None,
                     key: None,
@@ -166,7 +159,7 @@ impl WrappedBodyNode {
             BodyNode::NoScript(noscript) => {
                 let noscript = noscript.into_pub_fields();
                 Element {
-                    id: id.clone(),
+                    id: id_gen.new_id(),
                     name: std::borrow::Cow::Borrowed("div"),
                     attributes: hashmap! {},
                     listeners: vec![],
@@ -175,11 +168,12 @@ impl WrappedBodyNode {
                     key: None,
                 }
             }
+            // todo: this should be fixed
             BodyNode::Text(_) => panic!(""),
             BodyNode::Img(img) => {
                 let img = img.into_pub_fields();
                 Element {
-                    id: id.clone(),
+                    id: id_gen.new_id(),
                     name: std::borrow::Cow::Borrowed("img"),
                     attributes: img.attrs,
                     listeners: self.listeners,
