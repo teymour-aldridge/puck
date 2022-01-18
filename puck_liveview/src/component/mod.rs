@@ -9,9 +9,7 @@ use puck::ws::{message::Message, websocket::WebSocket};
 use crate::{
     client::ClientMessage,
     dom::{
-        element::{
-            diff::changeset::instruction_serializer::JsFriendlyInstructionSerializer, Element,
-        },
+        element::{diff::changeset::instruction_serializer::InstructionSerializer, Element},
         event::{ClickEvent, InputEvent, SubmitEvent},
         listener::Listener,
     },
@@ -71,7 +69,7 @@ fn main_loop<COMPONENT, DATA, INPUT>(
 
     let instructions = old_dom.diff(None);
 
-    let payload = serde_json::to_string(&JsFriendlyInstructionSerializer(instructions)).unwrap();
+    let payload = serde_json::to_string(&InstructionSerializer(instructions)).unwrap();
 
     stream.send(Message::Text(payload)).unwrap();
 
@@ -117,7 +115,7 @@ fn main_loop<COMPONENT, DATA, INPUT>(
                 let instructions = old_dom.diff(Some(&new_dom));
 
                 let _ = stream.send(Message::Text(
-                    serde_json::to_string(&JsFriendlyInstructionSerializer(instructions)).unwrap(),
+                    serde_json::to_string(&InstructionSerializer(instructions)).unwrap(),
                 ));
 
                 std::mem::swap(&mut old_dom, &mut new_dom);
