@@ -14,8 +14,6 @@ fn diffing_regression_2021_06_06() {
 
     let cs = diff_before.diff(Some(&expected_after));
 
-    dbg!(&cs);
-
     cs.apply(&mut before);
 
     assert_eq!(before, expected_after);

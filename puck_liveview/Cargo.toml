@@ -7,24 +7,28 @@ edition = "2018"
 [dependencies]
 derive_builder = "0.10.2"
 puck = { path = "../puck" }
-serde = { version = "1.0.130", features = ["derive"] }
+serde = { version = "1.0.133", features = ["derive"] }
 serde_json = "1.0.72"
 maplit = "1.0.2"
 lunatic = "0.7.0"
 proptest = { version = "1.0.0", optional = true }
+fuzzcheck = { version = "0.10.1", optional = true }
 
 [target.'cfg(not(target_arch="wasm32"))'.dependencies.malvolio]
-version = "0.3.1"
-features = ["pub_fields", "with_proptest"]
+git = "https://github.com/bailion/malvolio/"
+rev = "5b378be"
+features = ["pub_fields", "fuzz"]
 
 [target.'cfg(target_arch="wasm32")'.dependencies.malvolio]
-version = "0.3.1"
+git = "https://github.com/bailion/malvolio/"
+rev = "5b378be"
 features = ["pub_fields"]
 
 [dev-dependencies]
 insta = "1.8.0"
 scraper = "0.12.0"
+serde_json = "1.0.75"
 
 [features]
 apply = []
-_test_fuzzing = ["proptest", "apply"]
+_fuzz = ["apply", "fuzzcheck"]

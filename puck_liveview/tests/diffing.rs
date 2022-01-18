@@ -1,21 +1,13 @@
-#[cfg(feature = "_test_fuzzing")]
-mod test_diffing {
+#[cfg(feature = "_fuzz")]
+mod test {
+    use fuzzcheck::fuzz_test;
 
-    use proptest::{arbitrary::Arbitrary, proptest, strategy::Strategy};
     use puck_liveview::prelude::{BodyNode, IntoWrappedBodyNode};
 
-    proptest! {
-        #[test]
-        fn pt_test_diffing(before in generate_body_node(), after in generate_body_node()) {
-            test_diffing_inner(before, after);
-        }
-    }
-
-    fn generate_body_node() -> impl Strategy<Value = BodyNode> {
-        BodyNode::arbitrary_with((8, 256, 10))
-    }
-
-    fn test_diffing_inner(before: BodyNode, after: BodyNode) {
+    #[allow(unused)]
+    fn test_diff((before, after): &(BodyNode, BodyNode)) -> bool {
+        let before = before.clone();
+        let after = after.clone();
         let before = before.wrap().into_element(vec![0]);
         let expected_after = after.wrap().into_element(vec![0]);
 
@@ -24,6 +16,36 @@ mod test_diffing {
         let mut actual_after = before.clone();
         cs.apply(&mut actual_after);
 
-        assert_eq!(actual_after, expected_after);
+        actual_after == expected_after
+    }
+
+    #[test]
+    fn fuzz_diffing() {
+        let res = fuzz_test(test_diff).default_options().launch();
+        assert!(!res.found_test_failure);
+    }
+
+    fn test_regression(data: &str) {
+        let data: (BodyNode, BodyNode) = serde_json::from_str(data).unwrap();
+
+        assert!(test_diff(&data));
+    }
+
+    #[test]
+    fn regression_1() {
+        test_regression(r#"[{"NoScript":{"text":""}},{"Text":{"text":"","attrs":{}}}]"#)
+    }
+
+    #[test]
+    fn regression_2() {
+        test_regression(r#"[{"Text":{"text":"","attrs":{}}},{"Input":{"attrs":{}}}]"#)
+    }
+
+    #[test]
+    fn many_cov_hits() {
+        test_regression(r#"[{"A":{"attrs":{},"text":""}},{"Label":{"text":"","attrs":{}}}]"#);
+        test_regression(
+            r#"[{"Img":{"attrs":{"9":"6","p":"","F":""}}},{"H2":{"text":"","attrs":{"p":"","C":"","9":""}}}]"#,
+        );
     }
 }
