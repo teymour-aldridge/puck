@@ -1,6 +1,5 @@
 use std::borrow::Cow;
 use std::num::ParseIntError;
-use std::str::FromStr;
 
 use crate::dom::element::Element;
 use crate::dom::listener::ListenerRef;
@@ -150,13 +149,13 @@ impl<'a> Changeset<'a> {
         cow.clone().into_owned().into_owned().into()
     }
 
-    fn find_and_mutate(element: &mut Element, id: Vec<u32>, mutate: impl FnOnce(&mut Element)) {
+    fn find_and_mutate(element: &mut Element, id: usize, mutate: impl FnOnce(&mut Element)) {
         let el = Self::find_el_with_id(id, element).expect("failed to find element to mutate");
         (mutate)(el)
     }
 
-    fn try_parse(id: impl AsRef<str>) -> Result<Vec<u32>, ParseIntError> {
-        id.parse::<usize>()
+    fn try_parse(id: impl AsRef<str>) -> Result<usize, ParseIntError> {
+        id.as_ref().parse::<usize>()
     }
 
     fn parse(id: impl AsRef<str>) -> usize {

@@ -6,7 +6,7 @@ expression: c
 Changeset {
     ops: [
         Op {
-            id: "0-",
+            id: "0",
             instruction: SetText {
                 value: "the mat sat on the cat",
             },

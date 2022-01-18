@@ -6,7 +6,7 @@ use crate::dom::{element::Element, listener::ListenerRef};
 
 use self::id::IdGen;
 
-mod id;
+pub mod id;
 
 #[derive(Debug)]
 pub struct WrappedBodyNode {
