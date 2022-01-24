@@ -274,6 +274,6 @@ impl Element {
 
     /// Checks that the `Element` doesn't have children without a key.
     fn children_are_all_keyed(&self) -> bool {
-        !self.children.iter().any(|el| el.key.is_none())
+        self.children.iter().all(|el| el.key.is_some())
     }
 }
