@@ -269,6 +269,7 @@ impl Element {
             let self_len = self.children.len();
             let other_len = other.children.len();
 
+            #[allow(clippy::comparison_chain)]
             if self_len == other_len {
                 for (my_child, their_child) in self.children.iter().zip(&other.children) {
                     changeset.ops.extend(my_child.diff(Some(their_child)));

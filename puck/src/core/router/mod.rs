@@ -12,6 +12,7 @@ pub mod match_url;
 
 #[allow(missing_docs)]
 #[derive(Copy, Clone)]
+#[must_use]
 pub struct Route<STATE> {
     matcher: fn(&Request) -> bool,
     handler: fn(Request, Stream, STATE) -> UsedStream,
@@ -30,26 +31,27 @@ impl<STATE> Route<STATE> {
     pub fn new(
         matcher: fn(&Request) -> bool,
         handler: fn(Request, Stream, STATE) -> UsedStream,
-    ) -> Self {
-        Self { matcher, handler }
+    ) -> Route<STATE> {
+        Route { matcher, handler }
     }
 }
 
 /// A [Router] provides an easy way to match different types of HTTP request and handle them
 /// differently.
 #[derive(Debug, Clone, Default)]
+#[must_use]
 pub struct Router<STATE> {
     routes: Vec<Route<STATE>>,
 }
 
 impl<STATE: Serialize + DeserializeOwned + Clone> Router<STATE> {
     /// Constructs a new [Router].
-    pub fn new() -> Self {
-        Self { routes: vec![] }
+    pub fn new() -> Router<STATE> {
+        Router { routes: vec![] }
     }
 
     /// Add a route to the router.
-    pub fn route(mut self, route: Route<STATE>) -> Self {
+    pub fn route(mut self, route: Route<STATE>) -> Router<STATE> {
         self.routes.push(route);
         self
     }
@@ -68,7 +70,7 @@ impl<STATE: Serialize + DeserializeOwned + Clone> Router<STATE> {
     }
 
     /// Reconstructs the router from `Router::as_ints`. Panics if the data is not in a valid form.
-    pub(crate) fn from_ints(ints: Vec<(usize, usize)>) -> Self {
+    pub(crate) fn from_ints(ints: Vec<(usize, usize)>) -> Router<STATE> {
         let routes = ints
             .iter()
             .map(|(matcher, handler)| Route {
@@ -88,7 +90,7 @@ impl<STATE: Serialize + DeserializeOwned + Clone> Router<STATE> {
                 },
             })
             .collect::<Vec<_>>();
-        Self { routes }
+        Router { routes }
     }
 
     /// Runs the router forever on the provided port.
@@ -104,7 +106,7 @@ impl<STATE: Serialize + DeserializeOwned + Clone> Router<STATE> {
                 (self.as_ints(), stream, state.clone()),
                 |(ints, stream, state), _: Mailbox<()>| {
                     if let Ok(Some(req)) = Request::parse(stream.clone()) {
-                        let router = Self::from_ints(ints);
+                        let router = Router::<STATE>::from_ints(ints);
                         router.respond(req, Stream::new(stream, false), state);
                     }
                 },

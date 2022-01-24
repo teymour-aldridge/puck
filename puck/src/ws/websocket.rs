@@ -16,6 +16,7 @@ use super::{
 ///
 /// note: this _can_ be sent from one process to another, but it is intended that this struct
 /// only be used from one process at once
+#[must_use]
 pub struct WebSocket {
     stream: TcpStream,
     state: WebSocketState,

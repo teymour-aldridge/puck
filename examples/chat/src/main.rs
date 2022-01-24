@@ -173,7 +173,7 @@ impl Component<Process<puck::lunatic::Request<CoordinatorInput, LiveviewInput>>,
                                 currently_composing_message.clone(),
                             ))
                             .unwrap();
-                        self.update(res, &context);
+                        self.update(res, context);
                     }
                 }
             }
@@ -187,7 +187,7 @@ impl Component<Process<puck::lunatic::Request<CoordinatorInput, LiveviewInput>>,
                     messages: _,
                     currently_composing_message,
                     orchestrator: _,
-                } => *currently_composing_message = new_val.clone(),
+                } => *currently_composing_message = new_val,
             },
             _ => {
                 unreachable!()
