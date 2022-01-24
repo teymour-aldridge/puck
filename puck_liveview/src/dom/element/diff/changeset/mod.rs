@@ -88,6 +88,7 @@ pub(crate) enum Instruction<'a> {
         element: &'static str,
         html: String,
     },
+    DeleteEl,
 }
 
 #[derive(Debug, Deserialize)]
@@ -124,4 +125,5 @@ pub enum DeserializeInstruction {
     RemoveListeners,
     AttachListener { name: String, on: String },
     SetInnerHtml { element: String, html: String },
+    DeleteEl,
 }

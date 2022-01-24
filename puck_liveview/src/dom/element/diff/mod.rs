@@ -24,8 +24,8 @@ impl Element {
             c.ops.extend(self.diff_text(other));
             c.ops.extend(self.diff_listeners(other));
             // ... before we change the id
-            c.ops.extend(self.diff_id(other));
             c.ops.extend(self.diff_children(other));
+            c.ops.extend(self.diff_id(other));
         } else {
             c.ops.extend(self.create_from_scratch(None))
         }
@@ -179,12 +179,13 @@ impl Element {
     fn diff_listeners<'a>(&'a self, other: &'a Element) -> Changeset<'a> {
         let mut c = Changeset::empty();
 
-        if self.listeners.len() != other.listeners.len() {
+        if self.listeners == other.listeners {
+        } else {
             c.ops.push(Op {
                 id: self.id(),
                 instruction: Instruction::RemoveListeners,
             });
-            c.ops.extend(self.generate_listeners())
+            c.ops.extend(other.generate_listeners())
         }
 
         c
@@ -220,6 +221,7 @@ impl Element {
         let mut changeset = Changeset::empty();
 
         if self.children_are_all_keyed() && other.children_are_all_keyed() {
+            // nodes which are shared between us and the other node
             let mut unpaired = vec![];
             for (i, their_child) in other.children.iter().enumerate() {
                 if let Some(my_child) = self.locate_child_by_key(their_child.key.as_ref().unwrap())
@@ -230,6 +232,7 @@ impl Element {
                 }
             }
 
+            // generate all the new nodes (the ones that exist for them, but not for us)
             let len = unpaired.len();
             for each in unpaired {
                 changeset.ops.push(Op {
@@ -249,22 +252,46 @@ impl Element {
                     },
                 })
             }
+
+            // delete all the nodes that we have that they don't
+            for our_child in self.children.iter() {
+                if other
+                    .locate_child_by_key(our_child.key.as_ref().unwrap())
+                    .is_none()
+                {
+                    changeset.ops.push(Op {
+                        id: our_child.id(),
+                        instruction: Instruction::DeleteEl,
+                    })
+                }
+            }
         } else {
             let self_len = self.children.len();
             let other_len = other.children.len();
-            for (my_child, their_child) in self.children.iter().zip(&other.children) {
-                changeset.ops.extend(my_child.diff(Some(their_child)));
-            }
 
-            if self_len != other_len {
-                let (create_elements_from, start_index) = if self_len > other_len {
-                    (&self.children, other_len)
-                } else {
-                    (&other.children, self_len)
-                };
-
-                for el in create_elements_from[start_index..].iter() {
-                    changeset.ops.extend(el.create_from_scratch(Some(other)));
+            #[allow(clippy::comparison_chain)]
+            if self_len == other_len {
+                for (my_child, their_child) in self.children.iter().zip(&other.children) {
+                    changeset.ops.extend(my_child.diff(Some(their_child)));
+                }
+                // we are done
+            } else if self_len > other_len {
+                for el in self.children[other_len..].iter() {
+                    changeset.ops.push(Op {
+                        id: el.id(),
+                        instruction: Instruction::DeleteEl,
+                    })
+                }
+                for (my_child, their_child) in self.children.iter().zip(&other.children) {
+                    changeset.ops.extend(my_child.diff(Some(their_child)));
+                }
+            } else {
+                for (my_child, their_child) in self.children.iter().zip(&other.children) {
+                    changeset.ops.extend(my_child.diff(Some(their_child)));
+                }
+                // add all the elements that they have, but we don't
+                for el in other.children[self_len..].iter() {
+                    changeset.ops.extend(el.create_from_scratch(Some(self)));
                 }
             }
         }
@@ -274,6 +301,6 @@ impl Element {
 
     /// Checks that the `Element` doesn't have children without a key.
     fn children_are_all_keyed(&self) -> bool {
-        !self.children.iter().any(|el| el.key.is_none())
+        self.children.iter().all(|el| el.key.is_some())
     }
 }

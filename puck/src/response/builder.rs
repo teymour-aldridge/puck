@@ -7,6 +7,7 @@ use crate::{body::Body, request::Method, Response};
 
 /// Builds `Response`s.
 #[derive(Default)]
+#[must_use]
 pub struct ResponseBuilder {
     headers: HashMap<String, String>,
     body: Option<Body>,

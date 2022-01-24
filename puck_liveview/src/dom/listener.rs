@@ -53,8 +53,8 @@ impl<INPUT> Listener<INPUT> {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListenerRef {
-    listener_name: String,
-    js_event: String,
+    pub(crate) listener_name: String,
+    pub(crate) js_event: String,
 }
 
 impl ListenerRef {

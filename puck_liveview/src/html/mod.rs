@@ -9,6 +9,7 @@ use self::id::IdGen;
 pub mod id;
 
 #[derive(Debug)]
+#[must_use]
 pub struct WrappedBodyNode {
     node: BodyNode,
     listeners: Vec<ListenerRef>,
@@ -186,17 +187,20 @@ impl WrappedBodyNode {
         }
     }
 
-    pub fn listener(mut self, listener: impl Into<ListenerRef>) -> Self {
+    pub fn listener(mut self, listener: impl Into<ListenerRef>) -> WrappedBodyNode {
         self.listeners.push(listener.into());
         self
     }
 
-    pub fn child(mut self, child: impl Into<WrappedBodyNode>) -> Self {
+    pub fn child(mut self, child: impl Into<WrappedBodyNode>) -> WrappedBodyNode {
         self.children.push(child.into());
         self
     }
 
-    pub fn children(mut self, children: impl IntoIterator<Item = WrappedBodyNode>) -> Self {
+    pub fn children(
+        mut self,
+        children: impl IntoIterator<Item = WrappedBodyNode>,
+    ) -> WrappedBodyNode {
         self.children.extend(children);
         self
     }

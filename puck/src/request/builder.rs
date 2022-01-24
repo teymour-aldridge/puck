@@ -9,6 +9,7 @@ use crate::{body::Body, Request};
 use super::Method;
 
 #[derive(Debug)]
+#[must_use]
 /// A struct used to build HTTP requests.
 pub struct RequestBuilder {
     pub(crate) headers: HashMap<String, String>,

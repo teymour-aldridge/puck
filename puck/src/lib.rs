@@ -10,6 +10,7 @@ mod regressions;
 use body::{mime::HTML, Body};
 
 pub use anyhow;
+pub use lunatic;
 pub use request::Request;
 pub use response::Response;
 

@@ -45,7 +45,7 @@ impl<'a> Changeset<'a> {
                                 }
                             },
                         )
-                        .expect("`InsertAfter` – specified node to insert after was not found in children");
+                        .expect("`InsertAfter` - specified node to insert after was not found in children");
 
                     el.children.insert(
                         index + 1,
@@ -75,7 +75,7 @@ impl<'a> Changeset<'a> {
                                 }
                             },
                         )
-                        .expect("`InsertAfter` – specified node to insert after was not found in children");
+                        .expect("`InsertAfter` - specified node to insert after was not found in children");
 
                     el.children.insert(
                         index,
@@ -107,15 +107,17 @@ impl<'a> Changeset<'a> {
                         el.name = Self::crudely_remove_cow_lifetime_problems(name);
                     })
                 }
-                super::Instruction::CreateTag {
-                    name: _,
-                    parent_id: _,
-                } => {
-                    panic!(
-                        "this operation should not be possible to trigger (each tree has a single
-                        parent, and that parent will never be deleted)"
-                    )
-                }
+                super::Instruction::CreateTag { name, parent_id } => Self::find_and_mutate(
+                    element,
+                    parent_id.as_ref().unwrap().parse::<usize>().unwrap(),
+                    |parent| {
+                        parent.children.push(Element {
+                            id: el_id,
+                            name: name.clone().into_owned(),
+                            ..Default::default()
+                        })
+                    },
+                ),
                 super::Instruction::RemoveText => Self::find_and_mutate(element, el_id, |el| {
                     el.text = None;
                 }),
@@ -141,8 +143,32 @@ impl<'a> Changeset<'a> {
                             .remove(&Self::crudely_remove_cow_lifetime_problems(key));
                     })
                 }
+                super::Instruction::DeleteEl => {
+                    let id = Self::find_parent_id(element, el_id).unwrap();
+                    Self::find_and_mutate(element, id, |el| {
+                        let pos = el
+                            .children
+                            .iter()
+                            .position(|each| each.id().parse::<usize>().unwrap() == el_id)
+                            .unwrap();
+                        el.children.remove(pos);
+                    })
+                }
             }
         }
+    }
+
+    fn find_parent_id(el: &Element, id: usize) -> Option<usize> {
+        for child in &el.children {
+            if child.id().parse::<usize>().unwrap() == id {
+                return Some(el.id().parse::<usize>().unwrap());
+            } else {
+                if let Some(id) = Self::find_parent_id(&child, id) {
+                    return Some(id);
+                }
+            }
+        }
+        None
     }
 
     fn crudely_remove_cow_lifetime_problems(cow: &Cow<'_, Cow<'_, str>>) -> Cow<'static, str> {

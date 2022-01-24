@@ -1,12 +1,11 @@
 [package]
-name = "list"
+name = "chat"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 puck = { path = "../../puck" }
-lunatic = "0.7.4"
-serde = { version = "1.0.130", features = ["derive"] }
-malvolio = "0.3.1"
+puck_liveview = { path = "../../puck_liveview" }
+serde = { version = "1.0.134", features = ["derive"] }

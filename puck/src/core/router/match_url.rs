@@ -4,6 +4,7 @@ use url::Url;
 
 #[derive(Debug, Default)]
 /// Match against an URL.
+#[must_use]
 pub struct Match {
     segments: Vec<Segment>,
     // todo: other things, e.g. query params

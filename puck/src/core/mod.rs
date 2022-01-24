@@ -133,15 +133,15 @@ impl Stream {
     }
 
     /// Upgrade
-    pub fn upgrade(mut self, req: &Request) -> Result<WebSocket, UpgradeError> {
+    pub fn upgrade(mut self, req: &Request) -> Result<WebSocket, UsedStream> {
         self.keep_alive = false;
 
         if !ws::should_upgrade(req) {
-            return Err(UpgradeError::__NonExhaustive);
+            return Err(self.respond(crate::err_400()).unwrap());
         }
 
         if !ws::perform_upgrade(req, self.stream.clone()) {
-            return Err(UpgradeError::__NonExhaustive);
+            return Err(UsedStream::empty());
         }
 
         Ok(WebSocket::new(self.stream))
@@ -154,7 +154,7 @@ impl Stream {
         enc.write_tcp_stream(self.stream.clone())?;
 
         Ok(UsedStream {
-            stream: self.stream,
+            stream: Some(self.stream),
             keep_alive: self.keep_alive,
         })
     }
@@ -164,6 +164,17 @@ impl Stream {
 #[allow(unused)]
 ///
 pub struct UsedStream {
-    pub(crate) stream: TcpStream,
+    pub(crate) stream: Option<TcpStream>,
     pub(crate) keep_alive: bool,
+}
+
+impl UsedStream {
+    /// Returns an empty stream.
+    // todo: remove this API asap
+    pub fn empty() -> UsedStream {
+        UsedStream {
+            stream: None,
+            keep_alive: false,
+        }
+    }
 }
