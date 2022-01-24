@@ -12,10 +12,11 @@ pub fn should_upgrade(req: &crate::Request) -> bool {
         .get("Upgrade")
         .map(|val| val.to_ascii_lowercase() == "websocket")
         .unwrap_or_default()
+        // todo: read the spec to check if the check for the upgrade header is correct!
         && req
             .headers
             .get("Connection")
-            .map(|val| val.to_ascii_lowercase() == "upgrade")
+            .map(|val| val.to_ascii_lowercase().contains("upgrade"))
             .unwrap_or_default()
 }
 

@@ -21,7 +21,7 @@ pub struct WebSocket {
     state: WebSocketState,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Copy)]
 /// The state of the WebSocket connection (either open or closed).
 pub enum WebSocketState {
     /// The connection is open.
@@ -64,9 +64,17 @@ impl WebSocket {
         };
 
         Ok(UsedStream {
-            stream: self.stream,
+            stream: Some(self.stream),
             keep_alive: false,
         })
+    }
+
+    /// You probably don't want to use this.
+    pub fn make_copy(&self) -> WebSocket {
+        Self {
+            stream: self.stream.clone(),
+            state: self.state,
+        }
     }
 }
 
@@ -109,7 +117,7 @@ impl Iterator for WebSocket {
     }
 }
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]
 /// An error encountered when trying to lift the next message from the stream.
 pub enum NextMessageError {
     #[error("malformed client")]

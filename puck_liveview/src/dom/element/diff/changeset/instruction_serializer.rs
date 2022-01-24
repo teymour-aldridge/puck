@@ -100,6 +100,9 @@ impl<'a, 'b> Serialize for OpSerializer<'a, 'b> {
                 struct_serializer.serialize_field("ty", "removeAttr")?;
                 struct_serializer.serialize_field("payload", key)?;
             }
+            Instruction::DeleteEl => {
+                struct_serializer.serialize_field("ty", "deleteEl")?;
+            }
         }
         struct_serializer.end()
     }
