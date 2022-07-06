@@ -8,7 +8,7 @@ use crate::prelude::*;
 
 use crate::html::id::IdGen;
 
-#[test]
+#[lunatic::test]
 fn diffing_regression_2021_06_06() {
     let mut before = H1::new("")
         .raw_attribute("¡", "")
@@ -25,7 +25,7 @@ fn diffing_regression_2021_06_06() {
     assert_eq!(before, expected_after);
 }
 
-#[test]
+#[lunatic::test]
 fn diffing_regression_2022_01_23() {
     let mut before = Element {
         id: 0,
@@ -175,7 +175,7 @@ fn diffing_regression_2022_01_23() {
     assert_eq!(before, after);
 }
 
-#[test]
+#[lunatic::test]
 fn simple_listener_test() {
     let mut before = Element {
         id: 0,

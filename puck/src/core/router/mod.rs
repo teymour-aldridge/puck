@@ -1,7 +1,7 @@
 //! A router.
 use std::{fmt, mem};
 
-use lunatic::{net::TcpListener, process, Mailbox};
+use lunatic::{net::TcpListener, Mailbox, Process};
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::Request;
@@ -102,7 +102,7 @@ impl<STATE: Serialize + DeserializeOwned + Clone> Router<STATE> {
                 continue;
             };
 
-            let _ = process::spawn_with(
+            let _ = Process::spawn(
                 (self.as_ints(), stream, state.clone()),
                 |(ints, stream, state), _: Mailbox<()>| {
                     if let Ok(Some(req)) = Request::parse(stream.clone()) {

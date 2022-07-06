@@ -228,7 +228,7 @@ mod test_parse_frames {
 
     use crate::ws::frame::Frame;
 
-    #[test]
+    #[lunatic::test]
     fn test_parse_frames() {
         assert_eq!(
             Frame::parse(Cursor::new([137, 0,])).unwrap(),

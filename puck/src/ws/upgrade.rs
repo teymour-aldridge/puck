@@ -62,11 +62,10 @@ fn compute_accept_header(key: String) -> String {
 }
 
 #[cfg(test)]
-#[cfg(not(target_arch = "wasm32"))]
 mod test {
     use crate::ws::upgrade::compute_accept_header;
 
-    #[test]
+    #[lunatic::test]
     fn test_compute_upgrade_header() {
         assert_eq!(
             compute_accept_header("dGhlIHNhbXBsZSBub25jZQ==".to_string()),

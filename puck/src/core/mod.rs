@@ -4,7 +4,7 @@ use std::{io, mem};
 
 use lunatic::{
     net::{TcpListener, TcpStream, ToSocketAddrs},
-    process, Mailbox,
+    Mailbox, Process,
 };
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -43,7 +43,7 @@ where
 
         loop {
             if let Ok((stream, _)) = self.listener.accept() {
-                let _ = process::spawn_with(
+                let _ = Process::spawn(
                     (stream, ints.clone(), self.state.clone()),
                     |(stream, ints, state), _: Mailbox<()>| {
                         let router = Router::<STATE>::from_ints(ints);
@@ -78,7 +78,7 @@ where
             if let Ok((stream, _)) = self.listener.accept() {
                 let pointer = func as *const () as usize;
 
-                let _ = process::spawn_with(
+                let _ = Process::spawn(
                     (pointer, stream.clone(), self.state.clone()),
                     |(pointer, stream, state), _: Mailbox<()>| {
                         let reconstructed_func = pointer as *const ();

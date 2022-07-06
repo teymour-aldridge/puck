@@ -223,14 +223,14 @@ where
     }
 }
 
-#[cfg(all(test, not(target_arch = "wasm32")))]
-#[test]
+#[cfg(test)]
+#[lunatic::test]
 fn test_html_conversion() {
     use malvolio::prelude::*;
 
     let tree = Div::new();
     let output = tree.wrap().into_element(&mut IdGen::new());
-    insta::assert_debug_snapshot!("html_conversion_simple", output);
+    assert_eq!(&format!("{:?}", output), include_str!("tree"));
 
     let bigger_tree = Div::new().wrap().child(H1::new("Heading 1").wrap()).child(
         Input::new()
@@ -239,7 +239,7 @@ fn test_html_conversion() {
             .listener(ListenerRef::new("a_listener", "click")),
     );
     let output = bigger_tree.into_element(&mut IdGen::new());
-    insta::assert_debug_snapshot!("html_conversion_medium", output);
+    assert_eq!(&format!("{:?}", output), include_str!("bigger_tree"));
 
     let id_not_starting_from_zero = Form::new()
         .wrap()
@@ -248,5 +248,8 @@ fn test_html_conversion() {
     let mut idgen = IdGen::new();
     idgen.new_id();
     let output = id_not_starting_from_zero.into_element(&mut idgen);
-    insta::assert_debug_snapshot!("html_conversion_offset_starting_id", output);
+    assert_eq!(
+        &format!("{:?}", output),
+        include_str!("id_not_starting_from_zero")
+    );
 }

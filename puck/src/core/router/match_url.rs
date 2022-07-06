@@ -93,7 +93,7 @@ mod test {
 
     use super::*;
 
-    #[test]
+    #[lunatic::test]
     fn test_simple() {
         let matcher = Match::new()
             .at(path("home"))
