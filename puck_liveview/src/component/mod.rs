@@ -1,9 +1,6 @@
 use std::collections::HashMap;
 
-use lunatic::{
-    process::{self, this, Process},
-    Mailbox,
-};
+use lunatic::{Mailbox, Process};
 use puck::ws::{
     message::Message,
     websocket::{NextMessageError, WebSocket},
@@ -51,29 +48,25 @@ where
 /// Sets up the provided [Component] for communication over the WebSocket stream. The `Process`
 /// returned can be used to send messages to the component.
 // todo: simple code example
-pub fn manage<COMPONENT, DATA, INPUT>(
-    start_data: DATA,
-    stream: WebSocket,
-) -> Result<Process<INPUT>, lunatic::LunaticError>
+pub fn manage<COMPONENT, DATA, INPUT>(start_data: DATA, stream: WebSocket) -> Process<INPUT>
 where
     DATA: serde::Serialize + serde::de::DeserializeOwned,
     INPUT: serde::Serialize + serde::de::DeserializeOwned + std::fmt::Debug,
     COMPONENT: Component<DATA, INPUT>,
 {
-    process::spawn_with::<(DATA, WebSocket), INPUT>(
+    Process::spawn::<(DATA, WebSocket), Mailbox<INPUT>>(
         (start_data, stream),
         |(start_data, stream), mailbox| {
             // spawn new process
             // todo: maybe have a supervisor
-            let process = process::spawn_with(
+            let process = Process::spawn(
                 (start_data, stream.make_copy()),
                 main_loop::<COMPONENT, DATA, INPUT>,
-            )
-            .unwrap();
+            );
 
-            process.send(WsOrInput::WhoAmI(this(&mailbox)));
+            process.send(WsOrInput::WhoAmI(mailbox.this()));
 
-            process::spawn_with(
+            Process::spawn(
                 (stream, process.clone()),
                 |(mut websocket, process), _: Mailbox<()>| loop {
                     loop {
@@ -83,15 +76,12 @@ where
                         }
                     }
                 },
-            )
-            .unwrap();
+            );
 
             // forward all messages that this process receives to the child process
             loop {
                 let msg = mailbox.receive();
-                if let Ok(msg) = msg {
-                    process.send(WsOrInput::Input(msg));
-                }
+                process.send(WsOrInput::Input(msg));
             }
         },
     )
@@ -106,7 +96,7 @@ fn main_loop<COMPONENT, DATA, INPUT>(
     COMPONENT: Component<DATA, INPUT>,
 {
     let context = Context {
-        proc_id: match mailbox.receive().unwrap() {
+        proc_id: match mailbox.receive() {
             WsOrInput::WhoAmI(p) => p,
             _ => unreachable!(),
         },
@@ -125,7 +115,7 @@ fn main_loop<COMPONENT, DATA, INPUT>(
     loop {
         let msg = mailbox.receive();
         match msg {
-            Ok(WsOrInput::Ws(msg)) => {
+            WsOrInput::Ws(msg) => {
                 if let Ok(Message::Text(contents)) = msg {
                     // todo: this API is just plain messy
                     if let Ok(t) = serde_json::from_str::<ClientMessage>(&contents) {
@@ -183,12 +173,14 @@ fn main_loop<COMPONENT, DATA, INPUT>(
                     }
                 }
             }
-            Ok(WsOrInput::Input(input)) => {
+            WsOrInput::Input(input) => {
                 component.update(input, &context);
 
                 perform_diff(&component, &mut old_dom, &stream, &mut old_listeners);
             }
-            Ok(_) | Err(_) => {}
+            WsOrInput::WhoAmI(_) => {
+                unreachable!()
+            }
         }
     }
 }

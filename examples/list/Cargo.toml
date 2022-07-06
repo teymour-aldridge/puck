@@ -7,6 +7,6 @@ edition = "2018"
 
 [dependencies]
 puck = { path = "../../puck" }
-lunatic = "0.7.4"
-serde = { version = "1.0.130", features = ["derive"] }
+lunatic = "0.9.1"
+serde = { version = "1.0.138", features = ["derive"] }
 malvolio = "0.3.1"

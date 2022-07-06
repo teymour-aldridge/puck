@@ -22,7 +22,7 @@ fn execute_test(headers: Vec<(String, String)>, body: impl ToString) {
     }
 }
 
-#[test]
+#[lunatic::test]
 /// This regression test came from https://github.com/bailion/puck/runs/2756775397
 fn test_inverse_request_regression_2021_06_06_morning() {
     let headers = vec![
@@ -32,7 +32,7 @@ fn test_inverse_request_regression_2021_06_06_morning() {
     execute_test(headers, "u𘐿\\K;ῗ𐰑𖭜R");
 }
 
-#[test]
+#[lunatic::test]
 /// This regression test came from https://github.com/bailion/puck/runs/2758615118
 fn test_inverse_request_regression_2021_06_06_afternoon() {
     let headers = vec![

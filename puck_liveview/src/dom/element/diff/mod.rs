@@ -1,7 +1,6 @@
 pub(crate) mod changeset;
 
-#[cfg(test)]
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(test, feature = "apply"))]
 #[allow(unused_parens)]
 mod test_diffing;
 

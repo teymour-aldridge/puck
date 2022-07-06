@@ -3,8 +3,10 @@ use std::collections::{HashMap, HashSet};
 use puck::core::router::match_url::{Match, Segment};
 use puck::core::router::{Route, Router};
 use puck::core::{Core, UsedStream};
-use puck::lunatic::process::{spawn, Process};
-use puck::lunatic::Mailbox;
+use puck::lunatic::process::Request;
+use puck::lunatic::process::{AbstractProcess, ProcessRef, ProcessRequest, StartProcess};
+use puck::lunatic::serializer::Bincode;
+use puck::lunatic::Process;
 use puck::ws::websocket::WebSocket;
 use puck_liveview::component::Context;
 use puck_liveview::dom::event::{ClickEvent, InputEvent};
@@ -25,14 +27,14 @@ struct ChatMessage {
 enum LiveviewComponent {
     Uninitialized {
         username: Username,
-        orchestrator: Process<puck::lunatic::Request<CoordinatorInput, LiveviewInput>>,
+        orchestrator: ProcessRef<ChatServerState>,
     },
     Initialized {
         username: Username,
         user_id: UserId,
         messages: Vec<ChatMessage>,
         currently_composing_message: String,
-        orchestrator: Process<puck::lunatic::Request<CoordinatorInput, LiveviewInput>>,
+        orchestrator: ProcessRef<ChatServerState>,
     },
 }
 
@@ -52,13 +54,8 @@ impl LiveviewComponent {
     }
 }
 
-impl Component<Process<puck::lunatic::Request<CoordinatorInput, LiveviewInput>>, LiveviewInput>
-    for LiveviewComponent
-{
-    fn new(
-        orchestrator: Process<puck::lunatic::Request<CoordinatorInput, LiveviewInput>>,
-        _: &Context<LiveviewInput>,
-    ) -> Self {
+impl Component<ProcessRef<ChatServerState>, LiveviewInput> for LiveviewComponent {
+    fn new(orchestrator: ProcessRef<ChatServerState>, _: &Context<LiveviewInput>) -> Self {
         Self::Uninitialized {
             username: Username(String::new()),
             orchestrator,
@@ -119,12 +116,10 @@ impl Component<Process<puck::lunatic::Request<CoordinatorInput, LiveviewInput>>,
                         username,
                         orchestrator,
                     } => {
-                        let response = orchestrator
-                            .request(CoordinatorInput::RegisterNewUser(
-                                username.clone(),
-                                context.process(),
-                            ))
-                            .unwrap();
+                        let response = orchestrator.request(CoordinatorInput::RegisterNewUser(
+                            username.clone(),
+                            context.process(),
+                        ));
 
                         if let LiveviewInput::UserRegistered(user_id, username) = response {
                             *self = LiveviewComponent::Initialized {
@@ -167,12 +162,10 @@ impl Component<Process<puck::lunatic::Request<CoordinatorInput, LiveviewInput>>,
                         currently_composing_message,
                         orchestrator,
                     } => {
-                        let res = orchestrator
-                            .request(CoordinatorInput::SendMessage(
-                                *user_id,
-                                currently_composing_message.clone(),
-                            ))
-                            .unwrap();
+                        let res = orchestrator.request(CoordinatorInput::SendMessage(
+                            *user_id,
+                            currently_composing_message.clone(),
+                        ));
                         self.update(res, context);
                     }
                 }
@@ -352,16 +345,10 @@ impl Drop for LiveviewComponent {
     }
 }
 
-fn liveview(
-    stream: WebSocket,
-    state: Process<puck::lunatic::Request<CoordinatorInput, LiveviewInput>>,
-) -> UsedStream {
-    puck_liveview::component::manage::<
-        LiveviewComponent,
-        Process<puck::lunatic::Request<CoordinatorInput, LiveviewInput>>,
-        LiveviewInput,
-    >(state, stream)
-    .unwrap();
+fn liveview(stream: WebSocket, state: ProcessRef<ChatServerState>) -> UsedStream {
+    puck_liveview::component::manage::<LiveviewComponent, ProcessRef<ChatServerState>, LiveviewInput>(
+        state, stream,
+    );
     UsedStream::empty()
 }
 
@@ -422,52 +409,65 @@ impl UserIdCreator {
     }
 }
 
-fn chat_server_coordinator(
-    mailbox: Mailbox<puck::lunatic::Request<CoordinatorInput, LiveviewInput>>,
-) {
-    let mut users = HashMap::new();
-    let mut id_gen = UserIdCreator::default();
+#[derive(Default)]
+struct ChatServerState {
+    users: HashMap<UserId, (Username, Process<LiveviewInput, Bincode>)>,
+    id_gen: UserIdCreator,
+}
 
-    loop {
-        if let Ok(msg) = mailbox.receive() {
-            let data = msg.data().clone();
-            match data {
-                CoordinatorInput::RegisterNewUser(username, proc) => {
-                    let id = id_gen.get_id();
-                    users.insert(id, (username.clone(), proc));
-                    msg.reply(LiveviewInput::UserRegistered(id, username))
-                }
-                CoordinatorInput::SetUsername(id, username) => {
-                    users.entry(id).and_modify(|(u, _)| *u = username.clone());
-                    msg.reply(LiveviewInput::UpdatedUsername(username.clone()))
-                }
-                CoordinatorInput::SendMessage(id, message) => {
-                    let user_msg = ChatMessage {
-                        sender: id,
-                        username: users.get(&id).unwrap().0.clone(),
-                        contents: message.clone(),
-                    };
+impl AbstractProcess for ChatServerState {
+    type Arg = ();
 
-                    for (candidate, (_, proc)) in users.iter() {
-                        if *candidate != id {
-                            proc.send(LiveviewInput::ReceiveMessage(user_msg.clone()));
-                        }
+    type State = Self;
+
+    fn init(_: puck::lunatic::process::ProcessRef<Self>, _: Self::Arg) -> Self::State {
+        Default::default()
+    }
+}
+
+impl ProcessRequest<CoordinatorInput> for ChatServerState {
+    type Response = LiveviewInput;
+
+    fn handle(state: &mut Self::State, request: CoordinatorInput) -> Self::Response {
+        match request {
+            CoordinatorInput::RegisterNewUser(username, proc) => {
+                let id = state.id_gen.get_id();
+                state.users.insert(id, (username.clone(), proc));
+                LiveviewInput::UserRegistered(id, username)
+            }
+            CoordinatorInput::SetUsername(id, username) => {
+                state
+                    .users
+                    .entry(id)
+                    .and_modify(|(u, _)| *u = username.clone());
+                LiveviewInput::UpdatedUsername(username)
+            }
+            CoordinatorInput::SendMessage(id, message) => {
+                let user_msg = ChatMessage {
+                    sender: id,
+                    username: state.users.get(&id).unwrap().0.clone(),
+                    contents: message,
+                };
+
+                for (candidate, (_, proc)) in state.users.iter() {
+                    if *candidate != id {
+                        proc.send(LiveviewInput::ReceiveMessage(user_msg.clone()));
                     }
+                }
 
-                    msg.reply(LiveviewInput::ReceiveMessage(user_msg))
-                }
-                CoordinatorInput::RemoveUser(id) => {
-                    id_gen.release_id(id);
-                    users.remove(&id);
-                    msg.reply(LiveviewInput::Closed)
-                }
-            };
+                LiveviewInput::ReceiveMessage(user_msg)
+            }
+            CoordinatorInput::RemoveUser(id) => {
+                state.id_gen.release_id(id);
+                state.users.remove(&id);
+                LiveviewInput::Closed
+            }
         }
     }
 }
 
 fn main() {
-    let coordinator = spawn(chat_server_coordinator).unwrap();
+    let coordinator = ChatServerState::start((), None);
 
     let router = Router::new()
         .route(Route::new(

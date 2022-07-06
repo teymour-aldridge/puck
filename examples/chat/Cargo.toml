@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 puck = { path = "../../puck" }
 puck_liveview = { path = "../../puck_liveview" }
-serde = { version = "1.0.134", features = ["derive"] }
+serde = { version = "1.0.138", features = ["derive"] }

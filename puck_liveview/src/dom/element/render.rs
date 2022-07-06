@@ -39,14 +39,13 @@ impl Element {
     }
 }
 
-#[cfg(all(test, not(target_arch = "wasm32")))]
-/// We only run these tests on the native target.
+#[cfg(test)]
 mod test_render {
     use scraper::{Html, Selector};
 
     use crate::dom::element::Element;
 
-    #[test]
+    #[lunatic::test]
     fn test_render_nested_tags() {
         let tree = Element {
             id: 0,

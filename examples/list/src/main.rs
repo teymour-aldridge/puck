@@ -1,5 +1,5 @@
 use lunatic::{
-    process::{self, Process},
+    process::{AbstractProcess, ProcessRef, ProcessRequest, Request, StartProcess},
     Mailbox,
 };
 use malvolio::prelude::*;
@@ -18,9 +18,9 @@ use puck::{
 
 #[lunatic::main]
 fn main(_: Mailbox<()>) {
-    let proc = process::spawn(list).expect("failed to launch process");
+    let proc = List::start(vec![], None);
 
-    let router = Router::<Process<lunatic::Request<Msg, Reply>>>::new()
+    let router = Router::<ProcessRef<List>>::new()
         .route(Route::new(
             |request| {
                 request.method() == &Method::Get
@@ -62,7 +62,7 @@ fn main(_: Mailbox<()>) {
                     // beware of how utf-8 works if you copy this
                     let seg = res.split_at("message=".len()).1;
 
-                    match state.request(Msg::Add(seg.to_string())).unwrap() {
+                    match state.request(Msg::Add(seg.to_string())) {
                         Reply::Items(_) => unreachable!(),
                         Reply::Added => stream
                             .respond(
@@ -95,7 +95,7 @@ fn main(_: Mailbox<()>) {
             |request, stream, state| {
                 let segment = request.url().path().split_at("/read/".len()).1;
                 let n = segment.parse::<usize>().unwrap();
-                let res = state.request(Msg::LastN(n)).unwrap();
+                let res = state.request(Msg::LastN(n));
                 let items = match res {
                     Reply::Items(items) => items,
                     Reply::Added => unreachable!(),
@@ -141,36 +141,43 @@ enum Msg {
     LastN(usize),
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
-enum Reply {
-    Items(Vec<String>),
-    Added,
+struct List {
+    items: Vec<String>,
 }
 
-fn list(mailbox: Mailbox<lunatic::Request<Msg, Reply>>) {
-    let mut items: Vec<String> = vec![];
+impl AbstractProcess for List {
+    type Arg = Vec<String>;
 
-    loop {
-        let req = match mailbox.receive() {
-            Ok(req) => req,
-            Err(_) => {
-                continue;
-            }
-        };
+    type State = Self;
 
-        match req.data() {
+    fn init(_: lunatic::process::ProcessRef<Self>, arg: Self::Arg) -> Self::State {
+        Self { items: arg }
+    }
+}
+
+impl ProcessRequest<Msg> for List {
+    type Response = Reply;
+
+    fn handle(state: &mut Self::State, req: Msg) -> Self::Response {
+        match req {
             Msg::Add(string) => {
-                items.push(string.to_string());
-                req.reply(Reply::Added);
+                state.items.push(string);
+                Reply::Added
             }
-            Msg::AllItems => req.reply(Reply::Items(items.clone())),
+            Msg::AllItems => Reply::Items(state.items.clone()),
             Msg::LastN(n) => {
-                if items.len() < *n {
-                    req.reply(Reply::Items(items.clone()))
+                if state.items.len() < n {
+                    Reply::Items(state.items.clone())
                 } else {
-                    req.reply(Reply::Items(items.get(0..).unwrap().to_vec()))
+                    Reply::Items(state.items.get(0..).unwrap().to_vec())
                 }
             }
         }
     }
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+enum Reply {
+    Items(Vec<String>),
+    Added,
 }
